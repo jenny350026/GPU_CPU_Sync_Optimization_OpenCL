@@ -4,3 +4,11 @@ CMakeCache.txt
 cmake_install.cmake
 Makefile
 MIS_parallel
+
+simple_program/Makefile
+simple_program/CMakeCache.txt
+simple_program/simple_program
+simple_program/CMakeFiles
+simple_program/cmake_install.cmake
+simple_program/bin
+
