@@ -15,8 +15,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 ********************************************************************/
 
 // For clarity,error checking has been omitted.
-//#include <CL/cl_ext.h>
-//#include <CL/cl.h>
+
+#include <CL/cl.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -131,7 +131,7 @@ int main(int argc, char* argv[])
     CHECK_ERROR(retVal,CL_SUCCESS ,"program build failed");
     
     //body of the program where I initialize the buffer	
-    cl_int bufferSize = 56;
+    cl_int bufferSize = 5 ;
     cl_int *firstInput = new cl_int[bufferSize];
     for (int i = 0; i < bufferSize; i++) {
        firstInput[i] = i;
@@ -152,69 +152,74 @@ int main(int argc, char* argv[])
                  NULL,
                  &writeEvt);
     CHECK_OPENCL_ERROR(status, "clEnqueueWriteBuffer(inBuf) failed..");
-    status = waitForEventAndRelease(&writeEvt); 
+    //status = waitForEventAndRelease(&readEvt); can use this line to wait for events
     status = clFlush(commandQueue);
+     
     
      
     //create a memory object 
-    //---------guide::: create an SVM buffer
-    int* inputBuffer = (int *) clSVMAlloc(context, CL_MEM_READ_WRITE, bufferSize*sizeof(int), 0);
-
-    //error check 
-    if (inputBuffer == NULL) {
-        cout <<"inputBuffer was not generated" << endl;
-    }
+    //two different options for zero copy, used MEM_ALLOC_HOST_PTR or CL_MEM_USE_HOST_PTR
+    //---------guide:::  use the already known allocated memory
+    //cl_mem inputBuffer = clCreateBuffer(context, CL_MEM_USE_HOST_PTR, bufferSize*sizeof(cl_int), firstInput, &status);
+    //---------guide::: allocated a part of host memory and have the device memory to point at it
+    cl_mem inputBuffer = clCreateBuffer(context,CL_MEM_ALLOC_HOST_PTR,  bufferSize*sizeof(cl_int), NULL, &status);
+    CHECK_OPENCL_ERROR(status, "clCreateBuffer failed.(inBuf)");
    
-    //---------guide:::  map it for host
-    cl_event SMVMapEvt;
-    status = clEnqueueSVMMap(
+    //---------guide::: mapping memory. Allows CPU to get access to the buffer temporarily, till Unmapp is issued
+    //map the memory object, this is done because of the address translation necessary between cpu and gpu,
+    //if the device is discrete, this implecitly transfers data over, however in the case of APU devices,
+    cl_event MapEvt;
+    int *mappedData = (int *)clEnqueueMapBuffer(
             commandQueue,
+            inputBuffer, //the buffername to be added
             CL_FALSE, //whether blocking or no
             CL_MAP_READ | CL_MAP_WRITE, //whether mapped for reading or writing
-            inputBuffer, //the buffername to be added
+            0, //offset
             bufferSize * sizeof(cl_uint),
             0, //number of events to be implemented before this command 
             NULL, //event lists
-            &SMVMapEvt //event name
-            );
+            &MapEvt, //event name
+            &status);
     CHECK_OPENCL_ERROR(status, "clEnqueueMapBuffer(inBuf) failed..");
     //status = waitForEventAndRelease(&readEvt); can use this line to wait for events
     status = clFlush(commandQueue);
+    //---------guide:::  is necessary to allow cpu manipulate the buffer
     
     //memcpy(mappedData, firstInput, bufferSize*sizeof(int));  //don't forget to add sizeof 
     for (int i = 0; i< 5; i++) {
-        inputBuffer[i] *=3;
+        mappedData[i] *=3;
     }
   
 
    //unmapping, so that the device can safely use the buffer
-    cl_event SVMUnmapEvt;
-    status = clEnqueueSVMUnmap(
+    cl_event inUnmapEvt;
+    status = clEnqueueUnmapMemObject(
             commandQueue,
             inputBuffer,
+            mappedData,
             0,
             NULL,
-            &SVMUnmapEvt);
+            &inUnmapEvt);
     CHECK_OPENCL_ERROR(status, "clEnqueueUnmapMemObject failed. (inputBuffer)");   //writing to a buffer 
-    status = waitForEventAndRelease(&SVMUnmapEvt); 
     status = clFlush(commandQueue);
+    
     /*Step 8: Create kernel object */
     cl_kernel myKernel = clCreateKernel(program,"simple_program", &status);  //uses the opencl file. create couple if you have a copule of kernels
     CHECK_OPENCL_ERROR(status, "clCreateKernel failed");
 
     
     /*Step 9: Sets Kernel arguments.*/
-    status = clSetKernelArgSVMPointer(myKernel, 0, inputBuffer);
+	status = clSetKernelArg(myKernel, 0, sizeof(cl_mem), (void *)&inputBuffer);
     CHECK_OPENCL_ERROR(status, "setting kernel arguments failed asdfas"); 
     status = clSetKernelArg(myKernel, 1, sizeof(cl_mem), &bufferSizeBuffer); 
-    //status = clSetKernelArgSVMPointer(myKernel, 1,  (void *)bufferSizeBuffer); 
-    //CHECK_OPENCL_ERROR(status, "setting kernel arguments failed"); 
+    CHECK_OPENCL_ERROR(status, "setting kernel arguments failed"); 
     // Set Global and Local work items
     //
     size_t globalWorkItems = bufferSize; //total number of threads
     size_t localWorkItems = 64; //number of threads within a work group
-    
+
      //launching the kernel
+     
     cl_event krEvt;
     status = clEnqueueNDRangeKernel(                                                                                                          
                  commandQueue,
@@ -226,31 +231,69 @@ int main(int argc, char* argv[])
                  0,
                  NULL,
                  &krEvt);
-    
-    //CHECK_OPENCL_ERROR(status, "clEnqueueNDRangeKernel(counterKernel) failed."); 
+    CHECK_OPENCL_ERROR(status, "clEnqueueNDRangeKernel(counterKernel) failed."); 
     status = waitForEventAndRelease(&krEvt); // if you don't use this ,the kernel would be unblocking
+    
+    //cl_event MapEvt;
+    mappedData = (int *)clEnqueueMapBuffer(
+            commandQueue,
+            inputBuffer, //the buffername to be added
+            CL_FALSE, //whether blocking or no
+            CL_MAP_READ | CL_MAP_WRITE, //whether mapped for reading or writing
+            0, //offset
+            bufferSize * sizeof(cl_uint),
+            0, //number of events to be implemented before this command 
+            NULL, //event lists
+            &MapEvt, //event name
+            &status);
+    CHECK_OPENCL_ERROR(status, "clEnqueueMapBuffer(inBuf) failed..");
+    //status = waitForEventAndRelease(&readEvt); can use this line to wait for events
     status = clFlush(commandQueue);
+    
+    
+//    /*Step 11: Read the cout put back to host memory.*/
+//    cl_event readEvt;
+//    status = clEnqueueReadBuffer(
+//                 commandQueue,
+//                 inputBuffer, //a valid buffer to read from
+//                 CL_FALSE,
+//                 0,
+//                 bufferSize * sizeof(cl_uint),
+//                 firstInput, //where to store the data
+//                 0,
+//                 NULL,
+//                 &readEvt);
+//    CHECK_OPENCL_ERROR(status, "clEnqueueReadBuffer(counterOutBuf) failed.");
+    //inputBuffer[2] =inputBuffer[2]*inputBuffer[2];  
+    //firstInput[2] =firstInput[2]* firstInput[2];  
+    //status = clFlush(commandQueue);
+    //status = waitForEventAndRelease(&readEvt);
+    //CHECK_OPENCL_ERROR(status, "waitForEventAndRelease(readEvt) failed.");
     for (int i =0 ;i < bufferSize; i++) {
-        cout << "the " << i << "th value of the input is: " << inputBuffer[i] << endl;
+        cout << "the " << i << "th value of the input is: " << mappedData[i] << endl;
 
     }
+    cout<<"here"<<endl; 
     cout << "done with the program " <<endl;
 	/*Step 12: Clean the resources.*/
-    clSVMFree(context, (void *)inputBuffer);
-    status = clReleaseKernel(myKernel);				//Release kernel.
-    status = clReleaseProgram(program);				//Release the program object.
-    //status = clReleaseMemObject(outputBuffer);
+	status = clReleaseKernel(myKernel);				//Release kernel.
+	status = clReleaseProgram(program);				//Release the program object.
+	status = clReleaseMemObject(inputBuffer);		//Release mem object.
+	//status = clReleaseMemObject(outputBuffer);
 	status = clReleaseCommandQueue(commandQueue);	//Release  Command queue.
-    status = clReleaseContext(context);				//Release context.
+	status = clReleaseContext(context);				//Release context.
+
 //	if (output != NULL)
 //	{
 //		free(output);
 //		output = NULL;
 //	}
 
+
+
 	if (devices != NULL)
 	{
-		FREE(devices);
+		free(devices);
 		devices = NULL;
 	}
 
