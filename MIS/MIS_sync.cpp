@@ -16,6 +16,9 @@
 #include <CLUtil.hpp>
 #define OCL_COMPILER_FLAGS  "FineGrainSVM_OclFlags.txt"
 
+
+#define NODEBUG 0
+
 using namespace appsdk;
 
 int convertToString(const char *filename, std::string& s)
@@ -477,13 +480,13 @@ int main(int argc, char* argv[])
            printf("GPU Remaining Nodes = %d\n", *gpu_remainingnodes);
        }
 
-       
+#if NODEBUG       
     //---------guide:::  writing to the output
 	cout << "write to file before" << endl;
     //writing the random values in the log file 
     writeToFileNodeInfo(nodes_status_parallel, nodes_randvalues, numofnodes,logFileName, "all");
     showNodesInfo(nodes_status_parallel, nodes_randvalues, numofnodes, "all");
-
+#endif
 /*
 #if DEBUG2
 	for(int k=0 ; k<numofnodes; k++)
