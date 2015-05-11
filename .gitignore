@@ -5,6 +5,8 @@ cmake_install.cmake
 Makefile
 MIS_parallel
 
+/MIS_opencl/MIS_sync
+/MIS_opencl/MIS_sync.o
 */Makefile
 */CMakeCache.txt
 */CMakeFiles
