@@ -16,6 +16,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 // For clarity,error checking has been omitted.
 
+#define OCL_COMPILER_FLAGS  "FineGrainSVM_OclFlags.txt"
 #include <CL/cl.h>
 #include <string.h>
 #include <stdio.h>
@@ -129,6 +130,18 @@ int main(int argc, char* argv[])
     clGetProgramBuildInfo(program, devices[0], CL_PROGRAM_BUILD_LOG, log_size ,log, NULL);
     printf("%s\n",log );
     CHECK_ERROR(retVal,CL_SUCCESS ,"program build failed");
+    
+    /*Step 6: Build program. */
+    buildProgramData buildData;
+    buildData.kernelName = std::string("simpel_program_kernel.cl");
+    buildData.devices = devices;
+    buildData.deviceId = 0;
+    buildData.flagsStr = std::string("");
+    buildData.flagsFileName = std::string(OCL_COMPILER_FLAGS);
+
+    
+    
+    
     
     //body of the program where I initialize the buffer	
     cl_int bufferSize = 5 ;

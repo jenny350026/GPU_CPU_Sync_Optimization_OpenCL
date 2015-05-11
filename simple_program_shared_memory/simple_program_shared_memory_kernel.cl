@@ -16,25 +16,24 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 __kernel void simple_program(__global int* firstInput,__global int* bufferSize)
 {
 	 int num = get_global_id(0);
-     if (num < *bufferSize)  {
-       firstInput[num] =10;
-     }
+    firstInput[num] = 10;
+//     if (num < *bufferSize)  {
+//        firstInput[num] +=1;
+//     }
 }
-
-__kernel void simple_program_wait(__global int* firstInput,__global int* bufferSize)
-{
 #pragma OPENCL EXTENSION cl_amd_printf : enable
-int num = get_global_id(0);
-if (num < *bufferSize)  {
-         while(firstInput[num] < 10*num) { 
-             //cout<<"here is the value inside opencl. num:" << num << " and arrval:"<<firstInput[num] << endl;
-         printf("%d\n", num);  
-        }        
-        firstInput[num] =2;
-     }
-}
 
-__kernel void simple_program_2(__global int* firstInput)
+//int num = get_global_id(0);
+//if (num < *bufferSize)  {
+//         while(firstInput[num] < 10*num) { 
+//             //cout<<"here is the value inside opencl. num:" << num << " and arrval:"<<firstInput[num] << endl;
+//         printf("%d\n", num);  
+//        }        
+//        firstInput[num] =2;
+//     }
+//}
+
+__kernel void simple_program_x(__global int* firstInput)
 {
 	 int num = get_global_id(0);
      if (num < 5)  {

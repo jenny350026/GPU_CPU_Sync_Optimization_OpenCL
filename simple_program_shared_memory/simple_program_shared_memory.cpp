@@ -26,6 +26,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #include "CLUtil.hpp"
 #define SUCCESS 0
 #define FAILURE 1
+#define SAMPLE_VERSION "AMD-APP-SDK-v3.0.0.0"
+#define OCL_COMPILER_FLAGS  "FineGrainSVM_OclFlags.txt"
+
 
 using namespace appsdk;
 using namespace std;
@@ -110,32 +113,24 @@ int main(int argc, char* argv[])
     cl_command_queue commandQueue = clCreateCommandQueue(context, devices[0], props, &status); //we can set outof order execution here, also profiling of the commands
     CHECK_OPENCL_ERROR(status, "clCreateCommandQueue failed(commandQueue)");
 	
-    /*Step 5: Create program object */
-	const char *filename = "simple_program_shared_memory_kernel.cl"; //^^^provide the opencl file here
-	string sourceStr;
-	status = convertToString(filename, sourceStr);
-	const char *source = sourceStr.c_str();
-	size_t sourceSize[] = {strlen(source)};
-	cl_program program = clCreateProgramWithSource(context, 1, &source, sourceSize, &status);
-    CHECK_OPENCL_ERROR(status, "create program with source error");
-	
     
     /*Step 6: Build program. */
-	int retVal = clBuildProgram(program, 1,devices,NULL,NULL,NULL);
-    cout << "this is the retVal " <<retVal << endl; 
-   size_t log_size; 
-   clGetProgramBuildInfo(program, devices[0], CL_PROGRAM_BUILD_LOG, 0 , NULL, &log_size);
-   char *log  = (char*)  malloc(log_size);
-    clGetProgramBuildInfo(program, devices[0], CL_PROGRAM_BUILD_LOG, log_size ,log, NULL);
-    printf("%s\n",log );
+    cl_program program;
+    buildProgramData buildData;
+    buildData.kernelName = std::string("simple_program_shared_memory_kernel.cl");
+    buildData.devices = devices;
+    buildData.deviceId = 0;
+    buildData.flagsStr = std::string("");
+    buildData.flagsFileName = std::string(OCL_COMPILER_FLAGS);
+
+    int retVal = buildOpenCLProgram(program, context, buildData);
+    cout << "Retur value from build: " <<retVal << endl; 
     CHECK_ERROR(retVal,CL_SUCCESS ,"program build failed");
+    
     
     //body of the program where I initialize the buffer	
     cl_int bufferSize = 56;
-    cl_int *firstInput = new cl_int[bufferSize];
-    for (int i = 0; i < bufferSize; i++) {
-       firstInput[i] = i;
-    }
+    
     //creating a buffer	
     
      //writing into bufferSize buffer 
@@ -152,13 +147,13 @@ int main(int argc, char* argv[])
                  NULL,
                  &writeEvt);
     CHECK_OPENCL_ERROR(status, "clEnqueueWriteBuffer(inBuf) failed..");
-    status = waitForEventAndRelease(&writeEvt); 
     status = clFlush(commandQueue);
+    //status = waitForEventAndRelease(&writeEvt); 
     
      
     //create a memory object 
     //---------guide::: create an SVM buffer
-    int* inputBuffer = (int *) clSVMAlloc(context, CL_MEM_READ_WRITE, bufferSize*sizeof(int), 0);
+    int* inputBuffer = (int *) clSVMAlloc(context, CL_MEM_READ_WRITE, bufferSize*sizeof(cl_int), 4);
 
     //error check 
     if (inputBuffer == NULL) {
@@ -178,15 +173,19 @@ int main(int argc, char* argv[])
             &SMVMapEvt //event name
             );
     CHECK_OPENCL_ERROR(status, "clEnqueueMapBuffer(inBuf) failed..");
-    //status = waitForEventAndRelease(&readEvt); can use this line to wait for events
     status = clFlush(commandQueue);
+    status = waitForEventAndRelease(&SMVMapEvt); //can use this line to wait for events
     
     //memcpy(mappedData, firstInput, bufferSize*sizeof(int));  //don't forget to add sizeof 
-    for (int i = 0; i< 5; i++) {
-        inputBuffer[i] *=3;
+    for (int i = 0; i< bufferSize; i++) {
+        inputBuffer[i] = i;
     }
   
-
+     for (int i = 0; i< bufferSize; i++) {
+        cout<<"sdaf"<<inputBuffer[i]<<endl;;
+    }
+//  
+ 
    //unmapping, so that the device can safely use the buffer
     cl_event SVMUnmapEvt;
     status = clEnqueueSVMUnmap(
@@ -196,15 +195,15 @@ int main(int argc, char* argv[])
             NULL,
             &SVMUnmapEvt);
     CHECK_OPENCL_ERROR(status, "clEnqueueUnmapMemObject failed. (inputBuffer)");   //writing to a buffer 
-    status = waitForEventAndRelease(&SVMUnmapEvt); 
     status = clFlush(commandQueue);
+    status = waitForEventAndRelease(&SVMUnmapEvt); 
     /*Step 8: Create kernel object */
     cl_kernel myKernel = clCreateKernel(program,"simple_program", &status);  //uses the opencl file. create couple if you have a copule of kernels
     CHECK_OPENCL_ERROR(status, "clCreateKernel failed");
 
     
     /*Step 9: Sets Kernel arguments.*/
-    status = clSetKernelArgSVMPointer(myKernel, 0, inputBuffer);
+    status = clSetKernelArgSVMPointer(myKernel, 0,inputBuffer);
     CHECK_OPENCL_ERROR(status, "setting kernel arguments failed asdfas"); 
     status = clSetKernelArg(myKernel, 1, sizeof(cl_mem), &bufferSizeBuffer); 
     //status = clSetKernelArgSVMPointer(myKernel, 1,  (void *)bufferSizeBuffer); 
@@ -228,20 +227,37 @@ int main(int argc, char* argv[])
                  &krEvt);
     
     //CHECK_OPENCL_ERROR(status, "clEnqueueNDRangeKernel(counterKernel) failed."); 
-    status = waitForEventAndRelease(&krEvt); // if you don't use this ,the kernel would be unblocking
     status = clFlush(commandQueue);
+    status = waitForEventAndRelease(&krEvt); // if you don't use this ,the kernel would be unblocking
+    
+     //---------guide:::  map it for host
+    status = clEnqueueSVMMap(
+            commandQueue,
+            CL_FALSE, //whether blocking or no
+            CL_MAP_READ | CL_MAP_WRITE, //whether mapped for reading or writing
+            inputBuffer, //the buffername to be added
+            bufferSize * sizeof(cl_uint),
+            0, //number of events to be implemented before this command 
+            NULL, //event lists
+            &SMVMapEvt //event name
+            );
+    CHECK_OPENCL_ERROR(status, "clEnqueueMapBuffer(inBuf) failed..");
+    status = clFlush(commandQueue);
+    status = waitForEventAndRelease(&SMVMapEvt); //can use this line to wait for events
+    
+    
     for (int i =0 ;i < bufferSize; i++) {
         cout << "the " << i << "th value of the input is: " << inputBuffer[i] << endl;
 
     }
     cout << "done with the program " <<endl;
 	/*Step 12: Clean the resources.*/
-    clSVMFree(context, (void *)inputBuffer);
-    status = clReleaseKernel(myKernel);				//Release kernel.
-    status = clReleaseProgram(program);				//Release the program object.
-    //status = clReleaseMemObject(outputBuffer);
-	status = clReleaseCommandQueue(commandQueue);	//Release  Command queue.
-    status = clReleaseContext(context);				//Release context.
+//    clSVMFree(context, (void *)inputBuffer);
+//    status = clReleaseKernel(myKernel);				//Release kernel.
+//    status = clReleaseProgram(program);				//Release the program object.
+//    //status = clReleaseMemObject(outputBuffer);
+//	status = clReleaseCommandQueue(commandQueue);	//Release  Command queue.
+//    status = clReleaseContext(context);				//Release context.
 //	if (output != NULL)
 //	{
 //		free(output);
