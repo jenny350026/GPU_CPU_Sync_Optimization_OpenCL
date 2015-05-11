@@ -54,6 +54,26 @@ int read_input_file(string filename, int **addr_node_array, int **addr_index_arr
     	return 0;
 }
 
+void write_output(string filename, int *status_array, int numofnodes){
+
+    ofstream ofs(filename.c_str(), ofstream::out);
+
+    int count = 0;
+    for(int i = 0; i < numofnodes; i++){
+        if(status_array[i] == SELECTED)
+            count++;
+    }
+    
+    ofs << "(" << count << "): ";
+
+    for(int i = 0; i < numofnodes; i++){
+        if(status_array[i] == SELECTED)
+            ofs << i + 1 << " ";
+    }
+
+    ofs << endl;
+}
+
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -502,6 +522,9 @@ int main(int argc, char* argv[])
 		if(errormap != CL_SUCCESS) cout << "Error for reading back" << get_error_string(errormap) << endl;
 
     status = waitForEventAndRelease(&SMVMapEvt); //can use this line to wait for events
+    
+    //writing the result to the output 
+    write_output(outFilename , nodes_status_parallel, numofnodes);
     //cout <<"whatever! it works\n"<<endl; 
     //---------guide::: free everything
     clSVMFree(context, nodes);
