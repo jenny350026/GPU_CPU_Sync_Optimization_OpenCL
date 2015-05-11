@@ -134,7 +134,44 @@ def verifyNodesIndependant(possibleIndepNodeList, sparseRepFileName, printBool, 
 #   os.system("g++ serial.cpp")
 #   os.system("./a.out" + " " + sparseRepFileName + " " + MISResultToVerifyFileName); 
 #   
+
+
+def verifyMaximalSetCVersion(sparseRepFileName,  MISResultToVerifyFileName, logFileName):
+    maximalResult = "TBD"
+    IndepResult = "TBD"
+    with open(logFileName) as f:
+        failed = 1; 
+        gotBoth = 0; 
+        for line in f:
+            if len(line.strip().split()) > 0: 
+                if (line.strip().split()[0]) == "independenceTestResult:":
+                    IndepResult = line.strip().split()[2]
+                    gotBoth +=1; 
+                if (line.strip().split()[0]) == "maximalTestResult:":
+                    maximalResult = line.strip().split()[2]
+                    print IndepResult 
+                    gotBoth +=1
+            if(gotBoth == 2):
+                 break
+    
+    
+    #logFilePtr.write("--------number of max independant node test:----> " + IndepResult + "\n")
+    print "--------number of max independant node test:----> " + IndepResult + "\n"
+    
+    #logFilePtr.write("--------maximal independant test:----> " + maximalResult + "\n")
+    print "--------maximal independence test:----> " + maximalResult+ "\n"
+    
+    if (maximalResult == "failed") or (IndepResult == "failed"):
+        return 1
+    elif (maximalResult == "passed") and (IndepResult == "passed"):
+        return 0 
+    else:
+
+        print "could not find the result"
+        exit()
+     
 def verifyMaximalSet(sparseRepFileName,  MISResultToVerifyFileName, logFileName):
+
     #checking wheter the nodes found are actually independant
     possibleIndepNodeList = parseResultAndExtractIndepNodes(MISResultToVerifyFileName)
     failed = 0 #a flag indidcating whether some test was failed 
