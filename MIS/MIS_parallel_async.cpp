@@ -433,7 +433,8 @@ int main(int argc, char* argv[])
 
     //writing the result to the output 
     write_output(outFilename , nodes_status, numofnodes);
-   
+
+    writeToFileResult(nodes, index_array, nodes_status, numofnodes, logFileName);
 
 	/*Step 12: Clean the resources.*/
 	status = clReleaseKernel(mis_parallel_kernel);				//Release kernel.
@@ -450,22 +451,6 @@ int main(int argc, char* argv[])
 	}
 
 
-    writeToFileResult(nodes, index_array, nodes_status, numofnodes, logFileName);
-    
-    //if(check_independence(nodes, index_array, nodes_status, numofnodes))
-    //    cout << "nodes are independent" << endl;
-    //else
-    //    cout << "nodes are NOT independent" << endl;
-    //
-    //if(check_maximal(nodes, index_array, nodes_status, numofnodes))
-    //    cout << "nodes are maximal" << endl;
-    //else
-    //    cout << "nodes are NOT maximal" << endl;
-
-    //if(passed)
-	//    std::cout<<"Passed!\n";
-    //else
-	//    std::cout<<"Failed!\n";
 
 	return SUCCESS;
 }

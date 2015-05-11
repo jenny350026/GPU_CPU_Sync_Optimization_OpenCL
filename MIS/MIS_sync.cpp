@@ -511,6 +511,8 @@ int main(int argc, char* argv[])
 		printf("Execute[%d] = %d\n",l,nodes_execute[l]);
 	}
 
+    writeToFileResult(nodes, index_array, nodes_status_parallel, numofnodes, logFileName);
+
 	
     errormap = clEnqueueSVMUnmap(commandQueue,nodes_randvalues, 0, NULL, NULL);
 		if(errormap != CL_SUCCESS) cout << "Error for reading back" << get_error_string(errormap) << endl;
