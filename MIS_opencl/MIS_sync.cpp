@@ -143,7 +143,7 @@ int main(int argc, char* argv[])
     /*Step 6: Build program. */
     cl_program program;
     buildProgramData buildData;
-    buildData.kernelName = std::string("MIS_async.cl");
+    buildData.kernelName = std::string("MIS_sync.cl");
     buildData.devices = devices;
     buildData.deviceId = 0;
     buildData.flagsStr = std::string("");
@@ -155,7 +155,7 @@ int main(int argc, char* argv[])
  
     cl_program program_deactivate;
     buildProgramData buildData2;
-    buildData2.kernelName = std::string("MIS_async_deactivate.cl");
+    buildData2.kernelName = std::string("MIS_sync_deactivate.cl");
     buildData2.devices = devices;
     buildData2.deviceId = 0;
     buildData2.flagsStr = std::string("");
@@ -457,11 +457,12 @@ int main(int argc, char* argv[])
            printf("GPU Remaining Nodes = %d\n", *gpu_remainingnodes);
        }
 
-//	cout << "write to file before" << endl;
-        //writing the random values in the log file 
-//        writeToFileNodeInfo(nodes_status_parallel, nodes_randvalues, numofnodes,logFileName, "all");
-        //showNodesInfo(nodes_status_parallel, nodes_randvalues, nodes_execute, numofnodes, "all");
-//	cout << "after to file" <<endl;
+       
+    //---------guide:::  writing to the output
+	cout << "write to file before" << endl;
+    //writing the random values in the log file 
+    writeToFileNodeInfo(nodes_status_parallel, nodes_randvalues, numofnodes,logFileName, "all");
+    showNodesInfo(nodes_status_parallel, nodes_randvalues, numofnodes, "all");
 
 /*
 #if DEBUG2
