@@ -127,8 +127,10 @@ bool check_independence(int *node_array, int *index_array, int *status_array, in
 #if DEBUG
                 cout << "Node " << i << " neighbor node " << node_array[index_array[i] + j] << " status " << status_array[node_array[index_array[i] + j]] << endl;
 #endif
-                if( status_array[node_array[index_array[i] + j]] == SELECTED )
+                if( status_array[node_array[index_array[i] + j]] == SELECTED ){
                     independent = false;
+                    return independent; 
+                } 
             }
         }
     }
@@ -141,22 +143,21 @@ bool check_independence(int *node_array, int *index_array, int *status_array, in
 */
 
 bool check_maximal(int *node_array, int *index_array, int *status_array, int numofnodes){
-    bool maximal = true;
-
     for(int i = 0; i < numofnodes; i++){
         if(status_array[i] == INACTIVE){
             int numofneighbors = index_array[i+1] - index_array[i];
             bool neighbor_selected = false;
             for(int j = 0; j < numofneighbors; j++){
-               if ( status_array[node_array[index_array[i] + j]] == SELECTED )
+                if ( status_array[node_array[index_array[i] + j]] == SELECTED ){
                     neighbor_selected = true; 
+                    break;
+                } 
             }
-            
-            if(!neighbor_selected)
-                maximal = false;
+            if(!neighbor_selected){
+                return  false;
+            }
         }
-    }
-    return maximal;
+        return true;
 }
 
 void write_output(string filename, int *status_array, int numofnodes){
