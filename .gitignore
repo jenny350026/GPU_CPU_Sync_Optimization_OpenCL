@@ -11,3 +11,4 @@ MIS_parallel
 */cmake_install.cmake
 */bin
 
+*/*.graph
