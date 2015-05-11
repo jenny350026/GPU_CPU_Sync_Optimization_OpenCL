@@ -112,53 +112,6 @@ int read_input_file(string filename, cl_int **addr_node_array, cl_int **addr_ind
     *addr_index_array = index_array;
 }
 
-/*
-    this function is to check if all the nodes with status SELECTED are actually independent
-*/
-
-bool check_independence(int *node_array, int *index_array, int *status_array, int numofnodes){
-    bool independent = true;
-
-    // true until found a node with its neighbor also SELECTED
-    for(int i = 0; i < numofnodes; i++){
-        if(status_array[i] == SELECTED){
-            int numofneighbors = index_array[i+1] - index_array[i];
-            for(int j = 0; j < numofneighbors; j++){
-#if DEBUG
-                cout << "Node " << i << " neighbor node " << node_array[index_array[i] + j] << " status " << status_array[node_array[index_array[i] + j]] << endl;
-#endif
-                if( status_array[node_array[index_array[i] + j]] == SELECTED ){
-                    independent = false;
-                    return independent; 
-                } 
-            }
-        }
-    }
-    return independent;
-}
-
-/*
-    this function checks if all the nodes that are NOT SELECTED 
-    have at least one neighbor that is SELECTED
-*/
-
-bool check_maximal(int *node_array, int *index_array, int *status_array, int numofnodes){
-    for(int i = 0; i < numofnodes; i++){
-        if(status_array[i] == INACTIVE){
-            int numofneighbors = index_array[i+1] - index_array[i];
-            bool neighbor_selected = false;
-            for(int j = 0; j < numofneighbors; j++){
-                if ( status_array[node_array[index_array[i] + j]] == SELECTED ){
-                    neighbor_selected = true; 
-                    break;
-                } 
-            }
-            if(!neighbor_selected){
-                return  false;
-            }
-        }
-        return true;
-}
 
 void write_output(string filename, int *status_array, int numofnodes){
 
@@ -495,16 +448,19 @@ int main(int argc, char* argv[])
 		free(devices);
 		devices = NULL;
 	}
+
+
+    writeToFileResult(nodes, index_array, nodes_status, numofnodes, logFileName);
     
-    if(check_independence(nodes, index_array, nodes_status, numofnodes))
-        cout << "nodes are independent" << endl;
-    else
-        cout << "nodes are NOT independent" << endl;
-    
-    if(check_maximal(nodes, index_array, nodes_status, numofnodes))
-        cout << "nodes are maximal" << endl;
-    else
-        cout << "nodes are NOT maximal" << endl;
+    //if(check_independence(nodes, index_array, nodes_status, numofnodes))
+    //    cout << "nodes are independent" << endl;
+    //else
+    //    cout << "nodes are NOT independent" << endl;
+    //
+    //if(check_maximal(nodes, index_array, nodes_status, numofnodes))
+    //    cout << "nodes are maximal" << endl;
+    //else
+    //    cout << "nodes are NOT maximal" << endl;
 
     //if(passed)
 	//    std::cout<<"Passed!\n";
