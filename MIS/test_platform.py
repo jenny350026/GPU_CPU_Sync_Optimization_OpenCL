@@ -11,7 +11,7 @@ from generate_graph import *
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------
 #-------ONLY change this
-numOfNodes = 25 
+numOfNodes = 100 
 numOfTests = 1 
 #---------guide::: type of the test to run
 #testName = "runSomeSampleTests"
@@ -19,8 +19,8 @@ testName = "runTillFailure"
 generateGraph = True 
 #---------guide::: type of the algorithm to run
 #algorithm = "serial"
-algorithm = "asyncParallel"
-#algorithm = "syncParallel"
+#algorithm = "asyncParallel"
+algorithm = "syncParallel"
 #algorithm = "all" #includes serial, synchronous parallel, and asynchrnous parallel, more might be added later
 
 
@@ -67,7 +67,7 @@ def writeSparse(logFileName ,sparseRepFileName):
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 def runSyncParallel(sparseRepFileName, MISResultToVerifyFileNameParallel, logFileName, logFileNameFailedCase):
-    os.system("./buildsync.h")
+    os.system("./buildsync.sh")
     os.system("./MIS_sync" + " " + sparseRepFileName + " " + MISResultToVerifyFileNameParallel + " " + logFileName); 
     logFilePtr = open(logFileName, "a");
     logFilePtr.write("\n");
@@ -94,7 +94,7 @@ def runSyncParallel(sparseRepFileName, MISResultToVerifyFileNameParallel, logFil
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 def runAsyncParallel(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase):
-    os.system("./buildasync.h")
+    os.system("./buildasync.sh")
     os.system("./MIS_parallel_async" + " " + sparseRepFileName + " " + MISResultToVerifyFileNameParallel + " " + logFileName); 
     print "here" 
     logFilePtr = open(logFileName, "a");
