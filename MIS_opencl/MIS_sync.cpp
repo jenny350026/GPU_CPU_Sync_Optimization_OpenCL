@@ -420,7 +420,7 @@ int main(int argc, char* argv[])
            for(int i = 0; i < numofnodes; i++)
            {
                nodes_randvalues[i]= static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/40));
-               printf("randvalues[%d] = %.5f\n",i,nodes_randvalues[i]);
+               //printf("randvalues[%d] = %.5f\n",i,nodes_randvalues[i]);
            }
            readerror = clEnqueueSVMUnmap(commandQueue,nodes_randvalues, 0, NULL, NULL);
            if(readerror != CL_SUCCESS) cout << "Error for unmapping nodes_status!" << get_error_string(readerror) << endl;
