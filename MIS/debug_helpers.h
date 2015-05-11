@@ -14,6 +14,8 @@ using namespace std;
 void showNodesInfo(int *nodesStatus, float *nodeRandValues, int nodeArraySize, string request);
 void writeToFileNodeInfo(int *nodesStatus, float *nodeRandValues, int nodeArraySize, string fileName, string request);
 
+void writeToFileResult(int *nodes, int *index_array, int *nodes_status, int nodeArraySize, string fileName);
+
 const char * get_error_string(cl_int err){
          switch(err){
              case 0: return "CL_SUCCESS";

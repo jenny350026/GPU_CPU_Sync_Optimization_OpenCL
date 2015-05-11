@@ -14,15 +14,14 @@ from generate_graph import *
 numOfNodes = 100 
 numOfTests = 1 
 #---------guide::: type of the test to run
-#testName = "runSomeSampleTests"
-testName = "runTillFailure" 
+testName = "runSomeSampleTests"
+#testName = "runTillFailure" 
 generateGraph = True 
 #---------guide::: type of the algorithm to run
 #algorithm = "serial"
-#algorithm = "asyncParallel"
-algorithm = "syncParallel"
+algorithm = "asyncParallel"
+#algorithm = "syncParallel"
 #algorithm = "all" #includes serial, synchronous parallel, and asynchrnous parallel, more might be added later
-
 
 #sparseRepFileName = "sparse_rep.txt" #sparse representation of the graph
 sparseRepFileName = "af_shell9.graph" #sparse representation of the graph
@@ -83,7 +82,8 @@ def runSyncParallel(sparseRepFileName, MISResultToVerifyFileNameParallel, logFil
     #logFilePtr.write("*******************************************************************************************************************\n")
     logFilePtr.close() 
     
-    return verifyMaximalSet(sparseRepFileName,  MISResultToVerifyFileNameParallel, logFileName)
+    return verifyMaximalSetCVersion(sparseRepFileName,  MISResultToVerifyFileNameParallel, logFileName)
+    #return verifyMaximalSet(sparseRepFileName,  MISResultToVerifyFileNameParallel, logFileName)
 
 
 
@@ -96,7 +96,6 @@ def runSyncParallel(sparseRepFileName, MISResultToVerifyFileNameParallel, logFil
 def runAsyncParallel(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase):
     os.system("./buildasync.sh")
     os.system("./MIS_parallel_async" + " " + sparseRepFileName + " " + MISResultToVerifyFileNameParallel + " " + logFileName); 
-    print "here" 
     logFilePtr = open(logFileName, "a");
     logFilePtr.write("\n");
     logFilePtr.write("\n");
@@ -111,7 +110,8 @@ def runAsyncParallel(sparseRepFileName, MISResultToVerifyFileNameSerial, logFile
     #logFilePtr.write("*******************************************************************************************************************\n")
     logFilePtr.close() 
     
-    return verifyMaximalSet(sparseRepFileName,  MISResultToVerifyFileNameParallel, logFileName)
+    return verifyMaximalSetCVersion(sparseRepFileName,  MISResultToVerifyFileNameParallel, logFileName)
+    #return verifyMaximalSet(sparseRepFileName,  MISResultToVerifyFileNameParallel, logFileName)
        
 ##------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ##---------guide::: test the serial code 

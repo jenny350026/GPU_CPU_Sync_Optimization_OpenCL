@@ -112,52 +112,6 @@ int read_input_file(string filename, cl_int **addr_node_array, cl_int **addr_ind
     *addr_index_array = index_array;
 }
 
-/*
-    this function is to check if all the nodes with status SELECTED are actually independent
-*/
-
-bool check_independence(int *node_array, int *index_array, int *status_array, int numofnodes){
-    bool independent = true;
-
-    // true until found a node with its neighbor also SELECTED
-    for(int i = 0; i < numofnodes; i++){
-        if(status_array[i] == SELECTED){
-            int numofneighbors = index_array[i+1] - index_array[i];
-            for(int j = 0; j < numofneighbors; j++){
-#if DEBUG
-                cout << "Node " << i << " neighbor node " << node_array[index_array[i] + j] << " status " << status_array[node_array[index_array[i] + j]] << endl;
-#endif
-                if( status_array[node_array[index_array[i] + j]] == SELECTED )
-                    independent = false;
-            }
-        }
-    }
-    return independent;
-}
-
-/*
-    this function checks if all the nodes that are NOT SELECTED 
-    have at least one neighbor that is SELECTED
-*/
-
-bool check_maximal(int *node_array, int *index_array, int *status_array, int numofnodes){
-    bool maximal = true;
-
-    for(int i = 0; i < numofnodes; i++){
-        if(status_array[i] == INACTIVE){
-            int numofneighbors = index_array[i+1] - index_array[i];
-            bool neighbor_selected = false;
-            for(int j = 0; j < numofneighbors; j++){
-               if ( status_array[node_array[index_array[i] + j]] == SELECTED )
-                    neighbor_selected = true; 
-            }
-            
-            if(!neighbor_selected)
-                maximal = false;
-        }
-    }
-    return maximal;
-}
 
 void write_output(string filename, int *status_array, int numofnodes){
 
@@ -238,8 +192,8 @@ int main(int argc, char* argv[])
 	cl_context context = clCreateContext(NULL,1, devices,NULL,NULL,NULL);
 	
 	/*Step 4: Creating command queue associate with the context.*/
-    cl_command_queue_properties props = CL_QUEUE_PROFILING_ENABLE;
-    cl_command_queue commandQueue = clCreateCommandQueue(context, devices[0], props, &status); //we can set outof order execution here, also profiling of the commands
+    //const cl_command_queue_properties props = CL_QUEUE_PROFILING_ENABLE;
+    cl_command_queue commandQueue = clCreateCommandQueueWithProperties(context, devices[0], NULL, &status); //we can set outof order execution here, also profiling of the commands
     CHECK_OPENCL_ERROR(status, "clCreateCommandQueue failed(commandQueue)");
 	
     ///*Step 5: Create program object */
@@ -275,7 +229,7 @@ int main(int argc, char* argv[])
     }
 #endif
 
-    // set up execute, random, status and ready array
+    // set up execute, random, status, ready and counter arrays
     cl_int* nodes_execute = (int*) clSVMAlloc(context, CL_MEM_SVM_FINE_GRAIN_BUFFER, numofnodes*sizeof(int), 4);
     CHECK_ALLOCATION(nodes_execute, "Failed to allocate SVM memory. (nodes_execute)");
     std::fill_n(nodes_execute, numofnodes, 1);
@@ -293,6 +247,12 @@ int main(int argc, char* argv[])
     cl_int* nodes_ready = (int*) clSVMAlloc(context, CL_MEM_SVM_FINE_GRAIN_BUFFER|CL_MEM_SVM_ATOMICS, numofnodes*sizeof(int), 4);
     CHECK_ALLOCATION(nodes_ready, "Failed to allocate SVM memory. (nodes_ready)");
     std::fill_n(nodes_ready, numofnodes, 0);
+
+    cl_int* nodes_counter = (int*) clSVMAlloc(context, CL_MEM_SVM_FINE_GRAIN_BUFFER, numofnodes*sizeof(int), 4);
+    CHECK_ALLOCATION(nodes_counter, "Failed to allocate SVM memory. (nodes_execute)");
+
+    //cl_int* nodes_neighbor_counter = (int*) clSVMAlloc(context, CL_MEM_SVM_FINE_GRAIN_BUFFER, numofedges*2*sizeof(int), 4);
+    //CHECK_ALLOCATION(nodes_neighbor_counter, "Failed to allocate SVM memory. (nodes_execute)");
 
 #if DEBUG
     cout << "MAIN: " <<endl;
@@ -352,6 +312,18 @@ int main(int argc, char* argv[])
                 5,
                 nodes_ready); 
     CHECK_OPENCL_ERROR(status, "setting kernel arguments failed"); 
+
+    status = clSetKernelArgSVMPointer(
+                mis_parallel_kernel,
+                6,
+                nodes_counter); 
+    CHECK_OPENCL_ERROR(status, "setting kernel arguments failed"); 
+
+    //status = clSetKernelArgSVMPointer(
+    //            mis_parallel_kernel,
+    //            7,
+    //            nodes_neighbor_counter); 
+    //CHECK_OPENCL_ERROR(status, "setting kernel arguments failed"); 
 
     // For deactivate_neighbors kernel
 	status = clSetKernelArgSVMPointer(
@@ -444,15 +416,14 @@ int main(int argc, char* argv[])
         CHECK_OPENCL_ERROR(status, "waitForEventAndRelease failed.(ndrEvt)");
 
         step ++; 
-        //for(int i = 0; i < numofnodes; ++i){
-        //    cout << "execute " << i + 1 << " " << nodes_execute[i] << " status " << i + 1 << " " << nodes_status[i] << endl;
-        //}
-
         
         cout << "remaining: " << *gpu_remaining_nodes << endl;
-        
+        for(int i = 0; i < numofnodes; ++i){
+            if(nodes_counter[i] != 0)
+                cout << "node " << i + 1 << " waited " << nodes_counter[i] << " iterations." <<endl;
+        }
+            
         //---------guide:::  writing to the output
-        cout << "write to file before" << endl;
         //writing the random values in the log file 
         writeToFileNodeInfo(nodes_status, nodes_randvalues, numofnodes,logFileName, "all");
         //showNodesInfo(nodes_status, nodes_randvalues, numofnodes, "all");
@@ -460,31 +431,10 @@ int main(int argc, char* argv[])
     }
     
 
-    //cl_int *buffer, *atomicBuffer;
-    //int bufferSize;
-    //cl_kernel myKernel;
-    //// sets values of buffer while kernel waits for atomicBuffer[0] to become 99
-    //for (int i =0 ;i < bufferSize; i++) {
-    //    buffer[i] = 64;
-    //}
-
-    ////sets atomicBuffer to 99
-    //std::atomic_store_explicit ((std::atomic<int>*)&atomicBuffer[0], 99, std::memory_order_release);
-
-    //status = waitForEventAndRelease(&ndrEvt);
-    //CHECK_ERROR(status, SDK_SUCCESS, "WaitForEventAndRelease(ndrEvt) Failed");
-    //
-    //int passed = 1;
-    //
-	//for (cl_uint i=0;i<bufferSize;i++){
-    //    std::cout << buffer[i] << endl;
-	//	if (buffer[i] != (64+i))
-	//		passed = 0;
-    //}
-
     //writing the result to the output 
     write_output(outFilename , nodes_status, numofnodes);
-   
+
+    writeToFileResult(nodes, index_array, nodes_status, numofnodes, logFileName);
 
 	/*Step 12: Clean the resources.*/
 	status = clReleaseKernel(mis_parallel_kernel);				//Release kernel.
@@ -499,21 +449,8 @@ int main(int argc, char* argv[])
 		free(devices);
 		devices = NULL;
 	}
-    
-    if(check_independence(nodes, index_array, nodes_status, numofnodes))
-        cout << "nodes are independent" << endl;
-    else
-        cout << "nodes are NOT independent" << endl;
-    
-    if(check_maximal(nodes, index_array, nodes_status, numofnodes))
-        cout << "nodes are maximal" << endl;
-    else
-        cout << "nodes are NOT maximal" << endl;
-        
-    //if(passed)
-	//    std::cout<<"Passed!\n";
-    //else
-	//    std::cout<<"Failed!\n";
+
+
 
 	return SUCCESS;
 }

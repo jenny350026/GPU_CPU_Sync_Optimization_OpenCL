@@ -146,6 +146,72 @@ void writeToFileNodeInfo(int *nodesStatus, float *nodeRandValues, int nodeArrayS
     myfile.close();
 }
 
+/*
+    this function is to check if all the nodes with status SELECTED are actually independent
+*/
 
+bool check_independence(int *node_array, int *index_array, int *status_array, int numofnodes){
+    bool independent = true;
+
+    // true until found a node with its neighbor also SELECTED
+    for(int i = 0; i < numofnodes; i++){
+        if(status_array[i] == SELECTED){
+            int numofneighbors = index_array[i+1] - index_array[i];
+            for(int j = 0; j < numofneighbors; j++){
+#if DEBUG
+                cout << "Node " << i << " neighbor node " << node_array[index_array[i] + j] << " status " << status_array[node_array[index_array[i] + j]] << endl;
+#endif
+                if( status_array[node_array[index_array[i] + j]] == SELECTED ){
+                    independent = false;
+                    return independent; 
+                } 
+            }
+        }
+    }
+    return independent;
+}
+
+/*
+    this function checks if all the nodes that are NOT SELECTED 
+    have at least one neighbor that is SELECTED
+*/
+
+bool check_maximal(int *node_array, int *index_array, int *status_array, int numofnodes){
+    for(int i = 0; i < numofnodes; i++){
+        if(status_array[i] == INACTIVE){
+            int numofneighbors = index_array[i+1] - index_array[i];
+            bool neighbor_selected = false;
+            for(int j = 0; j < numofneighbors; j++){
+                if ( status_array[node_array[index_array[i] + j]] == SELECTED ){
+                    neighbor_selected = true; 
+                    break;
+                } 
+            }
+            if(!neighbor_selected){
+                return  false;
+            }
+        }
+    }
+    return true;
+}
+
+void writeToFileResult(int *nodes, int *index_array, int *nodes_status,int numofnodes, string fileName){
+
+    //open the file
+    ofstream myfile;
+    myfile.open (fileName.c_str(), std::ios_base::app);
+
+    if(check_independence(nodes, index_array, nodes_status, numofnodes))
+        myfile << "independenceTestResult: -----------> passed" << endl;
+    else
+        myfile << "independenceTestResult: -----------> failed " << endl;
+    
+    if(check_maximal(nodes, index_array, nodes_status, numofnodes))
+        myfile << "maximalTestResult: -----------> passed" << endl;
+    else
+        myfile << "maximalTestResult: -----------> failed" << endl;
+
+    myfile.close();
+}
 
 

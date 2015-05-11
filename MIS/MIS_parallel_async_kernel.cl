@@ -32,7 +32,7 @@ __kernel void simple_program(__global int* buffer, __global atomic_int* atomicBu
 
 }
 
-__kernel void mis_parallel_async(__global int *nodes, __global float *nodes_randvalues, __global int *nodes_status, __global int* indexarray, __global int* execute, volatile __global atomic_int *ready){ //, __global int* node_counters, __global int* node_neighbor_counters) {
+__kernel void mis_parallel_async(__global int *nodes, __global float *nodes_randvalues, __global int *nodes_status, __global int* indexarray, __global int* execute, volatile __global atomic_int *ready, __global int* node_counters) { //, __global int* node_neighbor_counters) {
     int i = get_global_id(0);
     
     execute[i] = 1;
@@ -41,11 +41,10 @@ __kernel void mis_parallel_async(__global int *nodes, __global float *nodes_rand
 
     if(nodes_status[i] == ACTIVE )
     {   
-        int protection = 0;
-        while (protection < 1000000 && atomic_load_explicit (&ready[i], memory_order_acquire, memory_scope_all_svm_devices) != 1){
-            protection++;
+        int counter = 0;
+        while (counter < 10000000000 && atomic_load_explicit (&ready[i], memory_order_acquire, memory_scope_all_svm_devices) != 1){
+            ++counter;
         }
-        //int counter = 0;
         //while(ready[i] == 0){
         //    /* this fails at compile stage, uncomment and run ./buildrun.sh to see the error messages
         //    int count = DELAY;
@@ -62,9 +61,9 @@ __kernel void mis_parallel_async(__global int *nodes, __global float *nodes_rand
         //node_counters[i] = counter;
         
         for(int k = 0; k < numofneighbour; k++){
-            protection = 0;
-            while (protection < 1000000 && atomic_load_explicit (&ready[nodes[indexarray[i] + k]], memory_order_acquire, memory_scope_all_svm_devices) != 1){
-                protection++;
+            //counter = 0;
+            while (counter < 1000000000 && atomic_load_explicit (&ready[nodes[indexarray[i] + k]], memory_order_acquire, memory_scope_all_svm_devices) != 1){
+                ++counter;
             }
             //counter = 0;
             //while(ready[nodes[indexarray[i] + k]] == 0){
@@ -75,7 +74,7 @@ __kernel void mis_parallel_async(__global int *nodes, __global float *nodes_rand
             //    ++counter;
             //}
             //node_neighbor_counters[indexarray[i] + k] = counter;
-            //node_counters[i] = counter;
+            node_counters[i] = counter;
 
             if(nodes_status[nodes[indexarray[i] + k]] == ACTIVE && nodes_randvalues[i] > nodes_randvalues[nodes[indexarray[i] + k]]) 
             {
