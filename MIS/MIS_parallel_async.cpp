@@ -244,7 +244,8 @@ int main(int argc, char* argv[])
     CHECK_ALLOCATION(nodes_execute, "Failed to allocate SVM memory. (nodes_execute)");
     std::fill_n(nodes_execute, numofnodes, 1);
 
-    cl_float *nodes_randvalues = (float*) clSVMAlloc(context, CL_MEM_SVM_FINE_GRAIN_BUFFER, numofnodes*sizeof(float), 4);
+    cl_float *nodes_randvalues = (float*) clSVMAlloc(context, CL_MEM_SVM_FINE_GRAIN_BUFFER|CL_MEM_SVM_ATOMICS, numofnodes*sizeof(float), 4);
+    //cl_double *nodes_randvalues = (double*) clSVMAlloc(context, CL_MEM_SVM_FINE_GRAIN_BUFFER|CL_MEM_SVM_ATOMICS, numofnodes*sizeof(double), 8);
     CHECK_ALLOCATION(nodes_randvalues, "Failed to allocate SVM memory. (nodes_randvalues)");
     srand (static_cast <unsigned> (time(0)));
     //for(int i = 0; i < numofnodes; i++)
@@ -254,9 +255,9 @@ int main(int argc, char* argv[])
     CHECK_ALLOCATION(nodes_status, "Failed to allocate SVM memory. (nodes_status)");
     std::fill_n(nodes_status, numofnodes, ACTIVE);
 
-    cl_int* nodes_ready = (int*) clSVMAlloc(context, CL_MEM_SVM_FINE_GRAIN_BUFFER|CL_MEM_SVM_ATOMICS, numofnodes*sizeof(int), 4);
-    CHECK_ALLOCATION(nodes_ready, "Failed to allocate SVM memory. (nodes_ready)");
-    std::fill_n(nodes_ready, numofnodes, 0);
+    //cl_int* nodes_ready = (int*) clSVMAlloc(context, CL_MEM_SVM_FINE_GRAIN_BUFFER|CL_MEM_SVM_ATOMICS, numofnodes*sizeof(int), 4);
+    //CHECK_ALLOCATION(nodes_ready, "Failed to allocate SVM memory. (nodes_ready)");
+    //std::fill_n(nodes_ready, numofnodes, 0);
 
     cl_int* nodes_counter = (int*) clSVMAlloc(context, CL_MEM_SVM_FINE_GRAIN_BUFFER, numofnodes*sizeof(int), 4);
     CHECK_ALLOCATION(nodes_counter, "Failed to allocate SVM memory. (nodes_execute)");
@@ -317,15 +318,15 @@ int main(int argc, char* argv[])
                 nodes_execute); 
     CHECK_OPENCL_ERROR(status, "setting kernel arguments failed"); 
 
-    status = clSetKernelArgSVMPointer(
-                mis_parallel_kernel,
-                5,
-                nodes_ready); 
-    CHECK_OPENCL_ERROR(status, "setting kernel arguments failed"); 
+    //status = clSetKernelArgSVMPointer(
+    //            mis_parallel_kernel,
+    //            5,
+    //            nodes_ready); 
+    //CHECK_OPENCL_ERROR(status, "setting kernel arguments failed"); 
 
     status = clSetKernelArgSVMPointer(
                 mis_parallel_kernel,
-                6,
+                5,
                 nodes_counter); 
     CHECK_OPENCL_ERROR(status, "setting kernel arguments failed"); 
 
@@ -345,30 +346,24 @@ int main(int argc, char* argv[])
     status = clSetKernelArgSVMPointer(
                 deactivate_neighbors_kernel,
                 1, 
-                nodes_randvalues); 
-    CHECK_OPENCL_ERROR(status, "setting kernel arguments failed"); 
-
-    status = clSetKernelArgSVMPointer(
-                deactivate_neighbors_kernel,
-                2, 
                 nodes_status); 
     CHECK_OPENCL_ERROR(status, "setting kernel arguments failed"); 
 
     status = clSetKernelArgSVMPointer(
                 deactivate_neighbors_kernel,
-                3, 
+                2, 
                 gpu_remaining_nodes);
     CHECK_OPENCL_ERROR(status, "setting kernel arguments failed"); 
 
     status = clSetKernelArgSVMPointer(
                 deactivate_neighbors_kernel,
-                4, 
+                3, 
                 index_array); 
     CHECK_OPENCL_ERROR(status, "setting kernel arguments failed"); 
 
     status = clSetKernelArgSVMPointer(
                 deactivate_neighbors_kernel,
-                5,
+                4,
                 nodes_execute); 
     CHECK_OPENCL_ERROR(status, "setting kernel arguments failed"); 
 
@@ -383,15 +378,18 @@ int main(int argc, char* argv[])
     vector<double> step_times;
     while (step < 10 && *gpu_remaining_nodes > 0){
         cout << "running step " << step << endl;
-        std::fill_n(nodes_ready, numofnodes, 0);
+        //std::fill_n(nodes_ready, numofnodes, 0);
+        std::fill_n(nodes_randvalues, numofnodes, 0);
 
 
         if (prime != 0)
             cout << "Randomizing " << prime << " elements for priming..." << endl;
 
         for(int i = 0; i < prime; i++){
-            nodes_randvalues[i]= static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/20));
-            std::atomic_store_explicit ((std::atomic<int>*)&nodes_ready[i], 1, std::memory_order_release);
+            //nodes_randvalues[i] = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/20));
+            //std::atomic_store_explicit ((std::atomic<double>*)&nodes_randvalues[i], static_cast <double> (rand()) / (static_cast <double> (RAND_MAX/20)), std::memory_order_release);
+            std::atomic_store_explicit ((std::atomic<float>*)&nodes_randvalues[i], static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/20)), std::memory_order_release);
+            //std::atomic_store_explicit ((std::atomic<int>*)&nodes_ready[i], 1, std::memory_order_release);
             //cout << nodes_randvalues[i] << endl;
         }
 
@@ -415,8 +413,11 @@ int main(int argc, char* argv[])
         CHECK_OPENCL_ERROR(status, "clFlush failed.(commandQueue)");
 
         for(int i = prime; i < numofnodes; i++){
-            nodes_randvalues[i]= static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/20));
-            std::atomic_store_explicit ((std::atomic<int>*)&nodes_ready[i], 1, std::memory_order_release);
+            //nodes_randvalues[i] = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/20));
+            //std::atomic_store_explicit ((std::atomic<double>*)&nodes_randvalues[i], static_cast <double> (rand()) / (static_cast <double> (RAND_MAX/20)), std::memory_order_release);
+            std::atomic_store_explicit ((std::atomic<float>*)&nodes_randvalues[i], static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/20)), std::memory_order_release);
+            //nodes_randvalues[i]= static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/20));
+            //std::atomic_store_explicit ((std::atomic<int>*)&nodes_ready[i], 1, std::memory_order_release);
             //cout << nodes_randvalues[i] << endl;
         }
 	    
