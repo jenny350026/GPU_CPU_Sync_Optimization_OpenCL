@@ -86,7 +86,8 @@ def runSyncParallel(sparseRepFileName, MISResultToVerifyFileNameParallel, logFil
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 def runAsyncParallel(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCasek, primeNum):
     os.system("./buildasync.sh")
-    os.system("./MIS_parallel_async" + " " + sparseRepFileName + " " + MISResultToVerifyFileNameParallel + " " + logFileName + " " + str(primeNum)); 
+    #os.system("./MIS_parallel_async" + " " + sparseRepFileName + " " + MISResultToVerifyFileNameParallel + " " + logFileName + " " + str(primeNum) + " " + logFileName+"_counter"); 
+    os.system("./MIS_parallel_async" + " " + sparseRepFileName + " " + MISResultToVerifyFileNameParallel + " " + logFileName + " " + str(primeNum) + " " + logFileName+"_counter"); 
     logFilePtr = open(logFileName, "a");
     logFilePtr.write("\n");
     logFilePtr.write("\n");
@@ -170,7 +171,26 @@ def generateLogFileName():
 
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-print "hello"
+#---------guide::: get timing information
+def getTimeInfo(fileName):
+    totalTime = 0
+    time = [] 
+    with open(fileName) as f:
+        for line in f:
+            if len(line.strip().split()) > 0: 
+                if len(line.strip().split())==3:
+                    if (line.strip().split()[0]) == "Total" and (line.strip().split()[1]) == "time:":
+                        totalTime =  float(line.strip().split()[2])
+                elif len(line.strip().split())==2:
+                    if (line.strip().split()[0]) == "Time:":
+                        time += [float(line.strip().split()[1])]
+    if totalTime==0 or time == []:
+        print "???????????????????????????????????????something went wrong.time was not calculated"
+        exit()
+    return (totalTime, time) 
+
+
+
 #---------guide::: tests the all code 
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -244,7 +264,10 @@ def testAll(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes, n
 	            logFileFailedCasePtr.close(); 
 	            print "right here" 
 	            drawGraphDebug(logFileName)
-	#        else:
+	
+        totalTime, time = getTimeInfo(logFileName) 
+        return totalTime #retur totalTime for now
+        #        else:
 	#            os.system("rm -r ./log")
 	#            os.system("rm -r ./log")
 	#

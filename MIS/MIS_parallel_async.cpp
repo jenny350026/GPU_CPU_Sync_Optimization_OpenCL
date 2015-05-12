@@ -151,7 +151,7 @@ int main(int argc, char* argv[])
         logFileName = argv[3]; 
     } 
 
-    if ( argc == 5 ){
+    if ( argc >= 5 ){
         stringstream ss(argv[4]);
         ss >> prime;
     }

@@ -11,15 +11,15 @@ testName = "runSomeSampleTests"
 
 #---------guide::: algorithm type
 #algorithm = "serial"
-#algorithm = "asyncParallel"
-algorithm = "syncParallel"
+algorithm = "asyncParallel"
+#algorithm = "syncParallel"
 #algorithm = "all" #includes serial, synchronous parallel, and asynchrnous parallel, more might be added later
 
 #---------guide::: generated graph parameters 
 generateGraph = True 
 sparseRepFileName = "../../exotic_graphs/nlpkkt120.graph" #sparse representation of the graph
 
-numOfNodes = 300
+numOfNodes = 8000 
 numOfTests = 1 
 
 #graphType = "completeChaos" #the graph is completely random, meaning the degree is not set
@@ -58,7 +58,6 @@ else:
 #
 
 if (generateGraph):
-
     sparseRepFileName = "sparse_rep.txt"
 
 
@@ -66,6 +65,9 @@ if (generateGraph):
 
 
 #---------guide::: testing everything
-testAll(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes, numOfTests, graphType, degree, doPrime, primeNum, primeFull)
-
-
+result = []
+for i in range(0, numOfNodes, 2000):
+    primeNum = i;
+    totalTime = testAll(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes, numOfTests, graphType, degree, doPrime, primeNum, primeFull)
+    result += [totalTime]
+print result
