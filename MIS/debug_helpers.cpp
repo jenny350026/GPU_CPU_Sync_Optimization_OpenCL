@@ -208,16 +208,39 @@ void writeToFileResult(int *nodes, int *index_array, int *nodes_status,int numof
     myfile.open (fileName.c_str(), std::ios_base::app);
 
     if(check_independence(nodes, index_array, nodes_status, numofnodes))
-        myfile << "independenceTestResult: -----------> passed" << endl;
+        myfile << "independeceTestResult -----------> passed" << endl;
     else
-        myfile << "independenceTestResult: -----------> failed " << endl;
+        myfile << "independeceTestResult -----------> failed " << endl;
     
     if(check_maximal(nodes, index_array, nodes_status, numofnodes))
-        myfile << "maximalTestResult: -----------> passed" << endl;
+        myfile << "maximalTestResult -----------> passed" << endl;
     else
-        myfile << "maximalTestResult: -----------> failed" << endl;
+        myfile << "maximalTestResult -----------> failed" << endl;
 
     myfile.close();
 }
 
+void writeToFileTiming(int *nodes_counter, vector<double> step_times, int numofnodes, string fileName){
+    //open the file
+    ofstream myfile;
+    myfile.open (fileName.c_str(), std::ios_base::app);
+
+    double total_time = 0;
+    for(int i = 0; i < step_times.size(); ++i){
+        myfile << "Step [" << i << "] start" << endl;
+        for(int j = 0; j < numofnodes; ++j){
+            if(nodes_counter[j] != 0)
+                myfile << "counter[" << i + 1 << "]: " << nodes_counter[i] <<endl;
+        }
+        myfile << "Time: " << step_times[i] << endl;
+        total_time += step_times[i];
+
+        myfile << "Step [" << i << "] end" << endl;
+    }
+
+    myfile << "Total steps: " << step_times.size() << endl;
+    myfile << "Total time: " << total_time << endl;
+
+    myfile.close();
+}
 

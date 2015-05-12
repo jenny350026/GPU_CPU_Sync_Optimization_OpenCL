@@ -467,6 +467,8 @@ int main(int argc, char* argv[])
 
     writeToFileResult(nodes, index_array, nodes_status, numofnodes, logFileName);
 
+    writeToFileTiming(nodes_counter, step_times, numofnodes, logFileName);
+
 	/*Step 12: Clean the resources.*/
 	status = clReleaseKernel(mis_parallel_kernel);				//Release kernel.
 	status = clReleaseKernel(deactivate_neighbors_kernel);				//Release kernel.
