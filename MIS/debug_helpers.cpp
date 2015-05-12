@@ -202,14 +202,14 @@ void writeToFileResult(int *nodes, int *index_array, int *nodes_status,int numof
     myfile.open (fileName.c_str(), std::ios_base::app);
 
     if(check_independence(nodes, index_array, nodes_status, numofnodes))
-        myfile << "independeceTestResult -----------> passed" << endl;
+        myfile << "independenceTestResult: -----------> passed" << endl;
     else
-        myfile << "independeceTestResult -----------> failed " << endl;
+        myfile << "independenceTestResult: -----------> failed " << endl;
     
     if(check_maximal(nodes, index_array, nodes_status, numofnodes))
-        myfile << "maximalTestResult -----------> passed" << endl;
+        myfile << "maximalTestResult: -----------> passed" << endl;
     else
-        myfile << "maximalTestResult -----------> failed" << endl;
+        myfile << "maximalTestResult: -----------> failed" << endl;
 
     myfile.close();
 }
