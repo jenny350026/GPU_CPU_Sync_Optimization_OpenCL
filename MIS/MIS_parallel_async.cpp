@@ -140,6 +140,7 @@ int main(int argc, char* argv[])
     string outFilename; 
     string inFilename; 
     string logFileName;
+    int prime = 0;
     if (argc <= 3) {
         cout << "not enough arguments" << endl;
         cout <<" you need to provide the sparse graph file name and then desired output file name and a logfile name"<<endl; 
@@ -149,6 +150,14 @@ int main(int argc, char* argv[])
         outFilename = argv[2]; 
         logFileName = argv[3]; 
     } 
+
+    if ( argc == 5 ){
+        stringstream ss(argv[4]);
+        ss >> prime;
+    }
+
+    SDKTimer *sdk_timer = new SDKTimer();
+    int timer = sdk_timer->createTimer();
 
 	/*Step1: Getting platforms and choose an available one.*/
 	cl_uint numPlatforms;	//the NO. of platforms
@@ -370,9 +379,25 @@ int main(int argc, char* argv[])
 
     int step = 0;
     cl_event ndrEvt;
+    vector<double> step_times;
     while (step < 10 && *gpu_remaining_nodes > 0){
         cout << "running step " << step << endl;
         std::fill_n(nodes_ready, numofnodes, 0);
+
+
+        if (prime != 0)
+            cout << "Randomizing " << prime << " elements for priming..." << endl;
+
+        for(int i = 0; i < prime; i++){
+            nodes_randvalues[i]= static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/20));
+            std::atomic_store_explicit ((std::atomic<int>*)&nodes_ready[i], 1, std::memory_order_release);
+            //cout << nodes_randvalues[i] << endl;
+        }
+
+        // start timer
+        sdk_timer->resetTimer(timer);
+        sdk_timer->startTimer(timer);
+
         status = clEnqueueNDRangeKernel(
                      commandQueue,
                      mis_parallel_kernel,
@@ -383,12 +408,12 @@ int main(int argc, char* argv[])
                      0,
                      NULL,
                      &ndrEvt);
-        CHECK_OPENCL_ERROR(status, "clEnqueueNDRangeKernel(counterKernel) failed."); 
+        CHECK_OPENCL_ERROR(status, "clEnqueueNDRangeKernel(mis_parrallel_kernel) failed."); 
 
         status = clFlush(commandQueue);
         CHECK_OPENCL_ERROR(status, "clFlush failed.(commandQueue)");
 
-        for(int i = 0; i < numofnodes; i++){
+        for(int i = prime; i < numofnodes; i++){
             nodes_randvalues[i]= static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/20));
             std::atomic_store_explicit ((std::atomic<int>*)&nodes_ready[i], 1, std::memory_order_release);
             //cout << nodes_randvalues[i] << endl;
@@ -407,7 +432,7 @@ int main(int argc, char* argv[])
                      0,
                      NULL,
                      &ndrEvt);
-        CHECK_OPENCL_ERROR(status, "clEnqueueNDRangeKernel(counterKernel) failed."); 
+        CHECK_OPENCL_ERROR(status, "clEnqueueNDRangeKernel(deactivate_neighbors_kernel) failed."); 
 
         status = clFlush(commandQueue);
         CHECK_OPENCL_ERROR(status, "clFlush failed.(commandQueue)");
@@ -415,13 +440,19 @@ int main(int argc, char* argv[])
         status = waitForEventAndRelease(&ndrEvt);
         CHECK_OPENCL_ERROR(status, "waitForEventAndRelease failed.(ndrEvt)");
 
-        step ++; 
+        sdk_timer->stopTimer(timer);
+
+        double step_time = (double)(sdk_timer->readTimer(timer));
+        cout << step_time  << "s" << endl;
+        step_times.push_back(step_time);
+
+        ++step; 
         
         cout << "remaining: " << *gpu_remaining_nodes << endl;
-        for(int i = 0; i < numofnodes; ++i){
-            if(nodes_counter[i] != 0)
-                cout << "node " << i + 1 << " waited " << nodes_counter[i] << " iterations." <<endl;
-        }
+        //for(int i = 0; i < numofnodes; ++i){
+        //    if(nodes_counter[i] != 0)
+        //        cout << "node " << i + 1 << " waited " << nodes_counter[i] << " iterations." <<endl;
+        //}
             
         //---------guide:::  writing to the output
         //writing the random values in the log file 
