@@ -220,22 +220,15 @@ void writeToFileResult(int *nodes, int *index_array, int *nodes_status,int numof
     myfile.close();
 }
 
-void writeToFileTiming(int *nodes_counter, vector<double> step_times, int numofnodes, string fileName){
+void writeToFileTiming(vector<double> step_times, int numofnodes, string fileName){
     //open the file
     ofstream myfile;
     myfile.open (fileName.c_str(), std::ios_base::app);
 
     double total_time = 0;
     for(int i = 0; i < step_times.size(); ++i){
-        myfile << "Step [" << i << "] start" << endl;
-        for(int j = 0; j < numofnodes; ++j){
-            if(nodes_counter[j] != 0)
-                myfile << "counter[" << j + 1 << "]: " << nodes_counter[j] <<endl;
-        }
-        myfile << "Time: " << step_times[i] << endl;
+        myfile << "Step [" << i << "] time " << step_times[i] << endl;
         total_time += step_times[i];
-
-        myfile << "Step [" << i << "] end" << endl;
     }
 
     myfile << "Total steps: " << step_times.size() << endl;
@@ -244,3 +237,14 @@ void writeToFileTiming(int *nodes_counter, vector<double> step_times, int numofn
     myfile.close();
 }
 
+void writeToFileCounters(int *nodes_counter, int step, int numofnodes, string fileName){
+    ofstream myfile;
+    myfile.open (fileName.c_str(), std::ios_base::app);
+    myfile << "Step [" << step << "] start" << endl;
+    for(int j = 0; j < numofnodes; ++j){
+        if(nodes_counter[j] != 0)
+            myfile << "counter[" << j + 1 << "]: " << nodes_counter[j] <<endl;
+    }
+    myfile << "Step [" << step << "] end" << endl;
+    myfile.close();
+}

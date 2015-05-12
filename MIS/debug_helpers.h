@@ -16,7 +16,8 @@ void writeToFileNodeInfo(int *nodesStatus, float *nodeRandValues, int nodeArrayS
 
 void writeToFileResult(int *nodes, int *index_array, int *nodes_status, int nodeArraySize, string fileName);
 
-void writeToFileTiming(int *nodes_counter, vector<double> step_times, int numofnodes, string filename);
+void writeToFileTiming(vector<double> step_times, int numofnodes, string filename);
+void writeToFileCounters(int *nodes_counter, int step, int numofnodes, string filename);
 
 const char * get_error_string(cl_int err){
          switch(err){

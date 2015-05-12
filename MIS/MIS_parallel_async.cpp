@@ -140,6 +140,7 @@ int main(int argc, char* argv[])
     string outFilename; 
     string inFilename; 
     string logFileName;
+    string counterFileName;
     int prime = 0;
     if (argc <= 3) {
         cout << "not enough arguments" << endl;
@@ -149,10 +150,11 @@ int main(int argc, char* argv[])
         inFilename = argv[1];
         outFilename = argv[2]; 
         logFileName = argv[3]; 
+        counterFileName = argv[4]; 
     } 
 
-    if ( argc >= 5 ){
-        stringstream ss(argv[4]);
+    if ( argc >= 6 ){
+        stringstream ss(argv[5]);
         ss >> prime;
     }
 
@@ -446,8 +448,6 @@ int main(int argc, char* argv[])
         cout << step_time  << "s" << endl;
         step_times.push_back(step_time);
 
-        ++step; 
-        
         cout << "remaining: " << *gpu_remaining_nodes << endl;
         //for(int i = 0; i < numofnodes; ++i){
         //    if(nodes_counter[i] != 0)
@@ -458,6 +458,9 @@ int main(int argc, char* argv[])
         //writing the random values in the log file 
         //writeToFileNodeInfo(nodes_status, nodes_randvalues, numofnodes,logFileName, "all");
         //showNodesInfo(nodes_status, nodes_randvalues, numofnodes, "all");
+        writeToFileCounters(nodes_counter, step, numofnodes, counterFileName);
+
+        ++step; 
     
     }
     
@@ -468,7 +471,7 @@ int main(int argc, char* argv[])
     //writing the test results
     writeToFileResult(nodes, index_array, nodes_status, numofnodes, logFileName);
     //writing the timing information
-    writeToFileTiming(nodes_counter, step_times, numofnodes, logFileName);
+    writeToFileTiming(step_times, numofnodes, logFileName);
 
 	/*Step 12: Clean the resources.*/
 	status = clReleaseKernel(mis_parallel_kernel);				//Release kernel.
