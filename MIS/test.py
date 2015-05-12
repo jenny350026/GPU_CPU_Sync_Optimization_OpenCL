@@ -65,9 +65,13 @@ if (generateGraph):
 
 
 #---------guide::: testing everything
-result = []
-for i in range(0, numOfNodes, 2000):
-    primeNum = i;
-    totalTime = testAll(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes, numOfTests, graphType, degree, doPrime, primeNum, primeFull)
-    result += [totalTime]
-print result
+#result = []
+#for i in range(0, numOfNodes, 2000):
+#    primeNum = i;
+#    totalTime = testAll(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes, numOfTests, graphType, degree, doPrime, primeNum, primeFull)
+#    result += [totalTime]
+#print result
+
+
+testAll(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes, numOfTests, graphType, degree, doPrime, primeNum, primeFull)
+
