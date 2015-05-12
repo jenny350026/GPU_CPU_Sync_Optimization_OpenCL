@@ -27,7 +27,6 @@ algorithm = "asyncParallel"
 generateGraph = True 
 sparseRepFileName = "../../exotic_graphs/nlpkkt120.graph" #sparse representation of the graph
 
-
 numOfNodes = 100 
 numOfTests = 1 
 
@@ -39,9 +38,10 @@ graphDegree = 4
 
 
 #---------guide::: priming info
-doPrime = "False"
+doPrime = "True"
 primeNumber = 3
 primeFull = "False"
+
 
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -142,7 +142,7 @@ def runSyncParallel(sparseRepFileName, MISResultToVerifyFileNameParallel, logFil
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 def runAsyncParallel(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase):
     os.system("./buildasync.sh")
-    os.system("./MIS_parallel_async" + " " + sparseRepFileName + " " + MISResultToVerifyFileNameParallel + " " + logFileName + " " + primeNum); 
+    os.system("./MIS_parallel_async" + " " + sparseRepFileName + " " + MISResultToVerifyFileNameParallel + " " + logFileName + " " + str(primeNum)); 
     logFilePtr = open(logFileName, "a");
     logFilePtr.write("\n");
     logFilePtr.write("\n");

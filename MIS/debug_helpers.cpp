@@ -63,6 +63,72 @@ void showNodesInfo(int *nodesStatus, float *nodeRandValues, int nodeArraySize, s
     }
 }
 
+
+
+//-----------------------------------------------------------------------------------------------------------------------------
+////-----------------------------------------------------------------------------------------------------------------------------
+////---------module_name::: writeToFileInfo
+////---------functionlity::: writes the status of the nodes to the file
+////-----------------------------------------------------------------------------------------------------------------------------
+////-----------------------------------------------------------------------------------------------------------------------------
+void writeToFileNodeStatus(int *nodesStatus, float *nodeRandValues, int nodeArraySize, string fileName){
+    //open the file
+    ofstream myfile;
+    myfile.open (fileName.c_str(), std::ios_base::app);
+    //this veriable determines whether we want to show the complete name of the status or just numbers 
+    bool showFullStatusName = true; 
+
+    myfile<<"***********************************************"<<endl;
+    myfile<<"showing all the nodes status was requests"<<endl; 
+    string nodeStatusString[3] = {"INACTIVE", "ACTIVE", "SELECTED"};
+    for (int i = 0; i< nodeArraySize; i++){
+        if(showFullStatusName) {
+            myfile<<"node "<< i + 1 << "th status is: " << nodeStatusString[nodesStatus[i]]<<endl;
+        }else{
+            myfile<<"node "<< i  + 1<< "th status is: " << nodesStatus[i]<<endl;
+        }
+    }
+    myfile<<"***********************************************"<<endl;; 
+    myfile<< "status:" << " "; 
+    for (int i = 0; i< nodeArraySize; i++){
+        if(showFullStatusName) {
+            //myfile<<"node "<< i + 1<< "th status is: " << nodeStatusString[nodesStatus[i]]<<endl;
+            myfile<< nodeStatusString[nodesStatus[i]]<< " ";
+        }
+    }
+    myfile << endl; 
+    myfile.close();
+}
+
+
+//-----------------------------------------------------------------------------------------------------------------------------
+////-----------------------------------------------------------------------------------------------------------------------------
+////---------module_name::: writeToFileInfo
+////---------functionlity::: writes the status of the nodes to the file
+////-----------------------------------------------------------------------------------------------------------------------------
+////-----------------------------------------------------------------------------------------------------------------------------
+void writeToFileNodeRandVals(int *nodesStatus, float *nodeRandValues, int nodeArraySize, string fileName){
+    ofstream myfile;
+    myfile.open (fileName.c_str(), std::ios_base::app);
+    //this veriable determines whether we want to show the complete name of the status or just numbers 
+    bool showFullStatusName = true; 
+    myfile<<"***********************************************"<<endl;; 
+    myfile<<"showing all the nodes rand values was requests"<<endl; 
+    for (int i = 0; i< nodeArraySize; i++){
+        //myfile<<"node "<< i + 1<< "th status is: " << nodeStatusString[nodesStatus[i]]<<endl;
+        myfile<<"node "<< i + 1<< "rand value is: " << nodeRandValues[i] << endl;
+    }
+    myfile<<"***********************************************"<<endl; 
+    myfile<< "randValues:" << " "; 
+    for (int i = 0; i< nodeArraySize; i++){
+        //myfile<<"node "<< i + 1<< "th status is: " << nodeStatusString[nodesStatus[i]]<<endl;
+        myfile<< nodeRandValues[i] << " ";
+    }
+    myfile<< endl; 
+    myfile<<"***********************************************"<<endl;; 
+    myfile.close();
+} 
+
 //-----------------------------------------------------------------------------------------------------------------------------
 ////-----------------------------------------------------------------------------------------------------------------------------
 ////---------module_name::: writeToFileInfo
@@ -70,80 +136,20 @@ void showNodesInfo(int *nodesStatus, float *nodeRandValues, int nodeArraySize, s
 ////-----------------------------------------------------------------------------------------------------------------------------
 ////-----------------------------------------------------------------------------------------------------------------------------
 void writeToFileNodeInfo(int *nodesStatus, float *nodeRandValues, int nodeArraySize, string fileName, string request){
-    //open the file
-    ofstream myfile;
-    myfile.open (fileName.c_str(), std::ios_base::app);
-    //this veriable determines whether we want to show the complete name of the status or just numbers 
-    bool showFullStatusName = true; 
-
-    //change the following if status.h changed 
     //show status 
-    if (request == "status") {
-        myfile<<"***********************************************"<<endl;
-        myfile<<"showing all the nodes status was requests"<<endl; 
-        string nodeStatusString[3] = {"INACTIVE", "ACTIVE", "SELECTED"};
-        for (int i = 0; i< nodeArraySize; i++){
-            if(showFullStatusName) {
-                myfile<<"node "<< i + 1 << "th status is: " << nodeStatusString[nodesStatus[i]]<<endl;
-            }else{
-                myfile<<"node "<< i  + 1<< "th status is: " << nodesStatus[i]<<endl;
-            }
-        }
-        myfile<<"***********************************************"<<endl;; 
-        myfile<< "status:" << " "; 
-        for (int i = 0; i< nodeArraySize; i++){
-            if(showFullStatusName) {
-                //myfile<<"node "<< i + 1<< "th status is: " << nodeStatusString[nodesStatus[i]]<<endl;
-                myfile<< nodeStatusString[nodesStatus[i]]<< " ";
-            }
-        }
-        myfile << endl; 
-    }
-    //show rand values 
-    else if (request == "randValues") {
-        myfile<<"***********************************************"<<endl;; 
-        myfile<<"showing all the nodes rand values was requests"<<endl; 
-        for (int i = 0; i< nodeArraySize; i++){
-            //myfile<<"node "<< i + 1<< "th status is: " << nodeStatusString[nodesStatus[i]]<<endl;
-            myfile<<"node "<< i + 1<< "rand value is: " << nodeRandValues[i] << endl;
-        }
-        myfile<<"***********************************************"<<endl; 
-        myfile<< "randValues:" << " "; 
-        for (int i = 0; i< nodeArraySize; i++){
-            //myfile<<"node "<< i + 1<< "th status is: " << nodeStatusString[nodesStatus[i]]<<endl;
-            myfile<< nodeRandValues[i] << " ";
-        }
-        myfile<< endl; 
-        myfile<<"***********************************************"<<endl;; 
-    } 
-
-    //show all the info 
-    //
+    if (request == "status") 
+        writeToFileNodeStatus(nodesStatus, nodeRandValues, nodeArraySize, fileName);
+    else if (request == "randValues") 
+        writeToFileNodeRandVals(nodesStatus, nodeRandValues, nodeArraySize, fileName);
     else if (request == "all") {
-        writeToFileNodeInfo(nodesStatus, nodeRandValues, nodeArraySize, fileName, "status");
-        writeToFileNodeInfo(nodesStatus, nodeRandValues, nodeArraySize, fileName, "randValues");
-//        cout << "the file name is" << fileName; 
-//        string nodeStatusString[3] = {"INACTIVE", "ACTIVE", "SELECTED"};
-//        myfile<<"***********************************************"<<endl;; 
-//        myfile<<"showing all the nodes rand values was requests"<<endl; 
-//        for (int i = 0; i< nodeArraySize; i++){
-//            //myfile<<"node "<< i + 1<< "th status is: " << nodeStatusString[nodesStatus[i]]<<endl;
-//            myfile<<"node "<< i + 1 << ":\t" << nodeStatusString[nodesStatus[i]] << "\t" << nodeRandValues[i] << "\t" << nodesStatus[i] <<  endl;
-//        }
-//        myfile<<"***********************************************"<<endl; 
-//        myfile<< "randValues:" << " "; 
-//        for (int i = 0; i< nodeArraySize; i++){
-//            //myfile<<"node "<< i + 1<< "th status is: " << nodeStatusString[nodesStatus[i]]<<endl;
-//            myfile<< nodeRandValues[i] << " ";
-//        }
-//        myfile<< endl; 
-//        myfile<<"***********************************************"<<endl;; 
+        writeToFileNodeStatus(nodesStatus, nodeRandValues, nodeArraySize, fileName);
+        writeToFileNodeRandVals(nodesStatus, nodeRandValues, nodeArraySize, fileName);
     }else {
+        ofstream myfile;
+        myfile.open (fileName.c_str(), std::ios_base::app);
         myfile<< "this information is not applicable"<<endl;
-
+        myfile.close();
     }
-    //closing the file 
-    myfile.close();
 }
 
 /*
