@@ -456,7 +456,7 @@ int main(int argc, char* argv[])
             
         //---------guide:::  writing to the output
         //writing the random values in the log file 
-        writeToFileNodeInfo(nodes_status, nodes_randvalues, numofnodes,logFileName, "all");
+        //writeToFileNodeInfo(nodes_status, nodes_randvalues, numofnodes,logFileName, "all");
         //showNodesInfo(nodes_status, nodes_randvalues, numofnodes, "all");
     
     }
@@ -464,9 +464,10 @@ int main(int argc, char* argv[])
 
     //writing the result to the output 
     write_output(outFilename , nodes_status, numofnodes);
-
+    
+    //writing the test results
     writeToFileResult(nodes, index_array, nodes_status, numofnodes, logFileName);
-
+    //writing the timing information
     writeToFileTiming(nodes_counter, step_times, numofnodes, logFileName);
 
 	/*Step 12: Clean the resources.*/
@@ -482,7 +483,6 @@ int main(int argc, char* argv[])
 		free(devices);
 		devices = NULL;
 	}
-
 
 
 	return SUCCESS;

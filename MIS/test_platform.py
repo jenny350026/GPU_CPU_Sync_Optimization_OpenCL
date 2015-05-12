@@ -27,20 +27,19 @@ algorithm = "asyncParallel"
 generateGraph = True 
 sparseRepFileName = "../../exotic_graphs/nlpkkt120.graph" #sparse representation of the graph
 
-numOfNodes = 100 
+numOfNodes = 20000
 numOfTests = 1 
 
-#graphType = "completeChaos"
+graphType = "completeChaos"
 #graphType = "dense"
-graphType = "degreeBased"
-
-graphDegree = 4
+#graphType = "degreeBased"
+graphDegree = 50 
 
 
 #---------guide::: priming info
-doPrime = "True"
+doPrime = True
 primeNumber = 3
-primeFull = "False"
+primeFull = False
 
 
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -54,7 +53,7 @@ if (doPrime):
 else:
     primeNumber = 0
 
-
+degree = 0
 if (graphType == "degreeBased"):
     if (graphDegree > numOfNodes/1.5):
         print "degree is too hight"
