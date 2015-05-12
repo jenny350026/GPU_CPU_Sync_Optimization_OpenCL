@@ -10,21 +10,65 @@ from generate_graph import *
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------
-#-------ONLY change this
-numOfNodes = 100 
-numOfTests = 1 
-#---------guide::: type of the test to run
+
+#-------ONLY change this------------------------------------------------------------------------------------------------------------------------------------
+
+#---------guide::: test type
 testName = "runSomeSampleTests"
 #testName = "runTillFailure" 
-generateGraph = True 
-#---------guide::: type of the algorithm to run
+
+#---------guide::: algorithm type
 #algorithm = "serial"
 algorithm = "asyncParallel"
 #algorithm = "syncParallel"
 #algorithm = "all" #includes serial, synchronous parallel, and asynchrnous parallel, more might be added later
 
-#sparseRepFileName = "sparse_rep.txt" #sparse representation of the graph
-sparseRepFileName = "af_shell9.graph" #sparse representation of the graph
+#---------guide::: generated graph parameters 
+generateGraph = True 
+sparseRepFileName = "../../exotic_graphs/nlpkkt120.graph" #sparse representation of the graph
+
+
+numOfNodes = 100 
+numOfTests = 1 
+
+#graphType = "completeChaos"
+#graphType = "dense"
+graphType = "degreeBased"
+
+graphDegree = 4
+
+
+#---------guide::: priming info
+doPrime = "False"
+primeNumber = 3
+primeFull = "False"
+
+#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#---------guide::: setting the variables appropirately based on the previous information
+if (doPrime):
+    if (primeFull):
+        primeNum = numOfNodes;
+    else:
+        primeNum = primeNumber
+else:
+    primeNumber = 0
+
+
+if (graphType == "degreeBased"):
+    if (graphDegree > numOfNodes/1.5):
+        print "degree is too hight"
+        exit()
+    else: 
+        degree = graphDegree
+
+
+if (generateGraph):
+
+    sparseRepFileName = "sparse_rep.txt"
+
+
+
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -54,8 +98,11 @@ def writeSparse(logFileName ,sparseRepFileName):
     logFilePtr.write("*************************sparse representation of the graph************************************\n")
     logFilePtr.write("sparseMatrixStart \n")
     logFilePtr.write(sparseRepFilePtr.read());
-    logFilePtr.write("sparseMatrixEnd ")
+    logFilePtr.write("sparseMatrixEnd\n")
 	
+
+
+
 
 
 
@@ -95,7 +142,7 @@ def runSyncParallel(sparseRepFileName, MISResultToVerifyFileNameParallel, logFil
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 def runAsyncParallel(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase):
     os.system("./buildasync.sh")
-    os.system("./MIS_parallel_async" + " " + sparseRepFileName + " " + MISResultToVerifyFileNameParallel + " " + logFileName); 
+    os.system("./MIS_parallel_async" + " " + sparseRepFileName + " " + MISResultToVerifyFileNameParallel + " " + logFileName + " " + primeNum); 
     logFilePtr = open(logFileName, "a");
     logFilePtr.write("\n");
     logFilePtr.write("\n");
@@ -195,7 +242,7 @@ if (testName == "runSomeSampleTests"):
     for i in range (0, numOfTests):
         #generate a graph       
         if (generateGraph) :
-            while not(generate_random_graphs(numOfNodes, sparseRepFileName)):
+            while not(generate_random_graphs(numOfNodes, sparseRepFileName, graphType, int(degree))):
                 counter +=1; #this is just so that while has a body, but the point is that we need to run the generate random_graph till the result is 1
         logFileName, logFileNameFailedCase = generateLogFileName()    
         writeSparse(logFileName, sparseRepFileName) 
@@ -223,7 +270,7 @@ if (testName == "runTillFailure"):
     while (not (failed)): 
         #generate a graph       
         if (generateGraph) :
-            while not(generate_random_graphs(numOfNodes, sparseRepFileName)):
+            while not(generate_random_graphs(numOfNodes, sparseRepFileName, graphType, degree)):
                 counter +=1; #this is just so that while has a body, but the point is that we need to run the generate random_graph till the result is 1
          
         logFileName, logFileNameFailedCase = generateLogFileName()    

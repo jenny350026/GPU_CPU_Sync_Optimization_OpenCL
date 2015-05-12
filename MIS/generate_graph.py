@@ -8,10 +8,17 @@ import copy
 #generate a random graph 
 #give it number of nodes and an output file
 #this function return a zero if one of the vertices has a degree 0 (which can be problematic), thus in this case, we need to recall till we get a graph where all nodes has a degree of one or higher
-def generate_random_graphs(numberOfNodes, outputFile):
+def generate_random_graphs(numberOfNodes, outputFile, graphType, degree=None):
     sparseResult = open(outputFile, "w")
     #first writing the number of nodes 
-    G=nx.gnm_random_graph(numberOfNodes, numberOfNodes*int(math.sqrt(numberOfNodes)))
+    if(graphType == "degreeBased"): 
+        G=nx.random_regular_graph(degree,numberOfNodes, numberOfNodes*int(math.sqrt(numberOfNodes)))
+    if(graphType == "completeChaos"): 
+        G=nx.gnm_random_graph(numberOfNodes, numberOfNodes*int(math.sqrt(numberOfNodes)))
+    if (graphType ==  "dense"):
+        G=nx.dense_gnm_random_graph(numberOfNodes, numberOfNodes*int(math.sqrt(numberOfNodes)))
+    
+    
     sparseResult.write(str(numberOfNodes) +  " " + str(nx.number_of_edges(G)) + "\n");
     semiSparseRep = nx.to_dict_of_lists(G)
     #print semiSparseRep 

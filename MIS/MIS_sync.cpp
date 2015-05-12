@@ -507,14 +507,15 @@ int main(int argc, char* argv[])
 	cout << "End of the execution, clFinish has been satisfied!" << endl;
 	
      //---------guide:::  printing the results
-	for(int l=0; l<numofnodes; l++)
-	{
-		printf("Rand[%d]= %.5f -- ",l,nodes_randvalues[l]);
-		printf("Status[%d] = %d",l,nodes_status_parallel[l]);
-		printf("Execute[%d] = %d\n",l,nodes_execute[l]);
-	}
+//	for(int l=0; l<numofnodes; l++)
+//	{
+//		printf("Rand[%d]= %.5f -- ",l,nodes_randvalues[l]);
+//		printf("Status[%d] = %d",l,nodes_status_parallel[l]);
+//		printf("Execute[%d] = %d\n",l,nodes_execute[l]);
+//	}
 
     writeToFileResult(nodes, index_array, nodes_status_parallel, numofnodes, logFileName);
+
 
 	
     errormap = clEnqueueSVMUnmap(commandQueue,nodes_randvalues, 0, NULL, NULL);
