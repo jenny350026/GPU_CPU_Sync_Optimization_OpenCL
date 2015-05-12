@@ -204,7 +204,7 @@ def runAll(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logF
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 #---------guide::: testing everything
-def testAll(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes, numOfTests, graphType, degree, doPrime, primeNum, primeFull):
+def testOnce(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes, numOfTests, graphType, degree, doPrime, primeNum, primeFull):
 	if (testName == "runSomeSampleTests"):
 	    counter  = 0
 	    for i in range (0, numOfTests):
@@ -272,6 +272,40 @@ def testAll(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes, n
 	#            os.system("rm -r ./log")
 	#
 
+
+
+
+def testSweep(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes, numOfTests, graphType, degree, doPrime, primeNumLowBound,primeNumHighBound, primeStepSize, primeFull):
+    #generate a graph       
+    totalTimeList = []
+    timeList = []
+    counter = 0 
+    if (generateGraph) :
+        while not(generate_random_graphs(numOfNodes, sparseRepFileName, graphType, int(degree))):
+            counter+=1
+    logFileName, logFileNameFailedCase = generateLogFileName()    
+    writeSparse(logFileName, sparseRepFileName) 
+
+    for primeNum in range(primeNumLowBound, primeNumHighBound, primeStepSize):	
+        if (algorithm == "serial"): 
+            #---------guide:::  run serial test
+            runSerial(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase) 
+        elif (algorithm == "syncParallel"): 
+            #---------guide:::  run parallel
+            runSyncParallel(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase) 
+        elif (algorithm == "asyncParallel"): 
+            runAsyncParallel(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase, primeNum)
+        elif(algorithm == "all"):
+            runAll(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase) 
+        else:
+            print "this algorithm is not acceptable" 
+            exit()
+
+        totalTimeThisRound, timeThisRound = getTimeInfo(logFileName) 
+        totalTimeList +=[totalTimeThisRound]
+        timeList += [timeThisRound]
+    return totalTimeList, timeList #retur totalTime for now
+	
 
 
 
