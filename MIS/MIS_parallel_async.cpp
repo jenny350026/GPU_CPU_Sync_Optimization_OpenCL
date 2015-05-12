@@ -157,7 +157,6 @@ int main(int argc, char* argv[])
         stringstream ss(argv[5]);
         ss >> prime;
     }
-
     SDKTimer *sdk_timer = new SDKTimer();
     int timer = sdk_timer->createTimer();
 

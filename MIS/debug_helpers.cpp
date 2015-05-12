@@ -227,7 +227,8 @@ void writeToFileTiming(vector<double> step_times, int numofnodes, string fileNam
 
     double total_time = 0;
     for(int i = 0; i < step_times.size(); ++i){
-        myfile << "Step [" << i << "] time " << step_times[i] << endl;
+        //myfile << "Step [" << i << "] time " << step_times[i] << endl;
+        myfile << "Time: " << step_times[i] << endl;
         total_time += step_times[i];
     }
 

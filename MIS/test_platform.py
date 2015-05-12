@@ -87,7 +87,7 @@ def runSyncParallel(sparseRepFileName, MISResultToVerifyFileNameParallel, logFil
 def runAsyncParallel(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCasek, primeNum):
     os.system("./buildasync.sh")
     #os.system("./MIS_parallel_async" + " " + sparseRepFileName + " " + MISResultToVerifyFileNameParallel + " " + logFileName + " " + str(primeNum) + " " + logFileName+"_counter"); 
-    os.system("./MIS_parallel_async" + " " + sparseRepFileName + " " + MISResultToVerifyFileNameParallel + " " + logFileName + " " + str(primeNum) + " " + logFileName+"_counter"); 
+    os.system("./MIS_parallel_async" + " " + sparseRepFileName + " " + MISResultToVerifyFileNameParallel + " " + logFileName + " "  + " " + logFileName+"_counter" + " " + str(primeNum)); 
     logFilePtr = open(logFileName, "a");
     logFilePtr.write("\n");
     logFilePtr.write("\n");
