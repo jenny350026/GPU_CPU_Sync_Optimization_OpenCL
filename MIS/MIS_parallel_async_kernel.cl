@@ -14,7 +14,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ********************************************************************/
 #include "status.h"
-//#pragma OPENCL EXTENSION cl_amd_printf : enable
+#pragma OPENCL EXTENSION cl_amd_printf : enable
 __kernel void simple_program(__global int* buffer, __global atomic_int* atomicBuffer)
 {
 	int num = get_global_id(0);
@@ -32,7 +32,7 @@ __kernel void simple_program(__global int* buffer, __global atomic_int* atomicBu
 
 }
 
-__kernel void mis_parallel_async(__global int *nodes, volatile __global atomic_float *nodes_randvalues, __global int *nodes_status, __global int* indexarray, __global int* execute, __global int* node_counters) { //, __global int* node_neighbor_counters) {
+__kernel void mis_parallel_async(__global int *nodes, __global float *nodes_randvalues, __global int *nodes_status, __global int* indexarray, __global int* execute, volatile __global atomic_int *ready, __global int* node_counters) { //, __global int* node_neighbor_counters) {
     int i = get_global_id(0);
     
     execute[i] = 1;
@@ -42,33 +42,41 @@ __kernel void mis_parallel_async(__global int *nodes, volatile __global atomic_f
     if(nodes_status[i] == ACTIVE )
     {   
         int counter = 0;
-        //float rand_value = 0;
-        //while (counter < 10000000000 && atomic_load_explicit (&ready[i], memory_order_acquire, memory_scope_all_svm_devices) != 1){
-        //while (counter < 100000000 && rand_value == 0){
-        while (counter < 100000000 && atomic_load_explicit (&nodes_randvalues[i], memory_order_acquire, memory_scope_all_svm_devices) == 0){
-        //while (counter < 100000000 && atomic_load (&nodes_randvalues[i]) == 0){
+        while (counter < 10000000000 && atomic_load_explicit (&ready[i], memory_order_acquire, memory_scope_all_svm_devices) != 1){
             ++counter;
-            //rand_value = nodes_randvalues[i];
-            //rand_value = atomic_load_explicit (&nodes_randvalues[i], memory_order_acquire, memory_scope_all_svm_devices);
         }
+        //while(ready[i] == 0){
+        //    /* this fails at compile stage, uncomment and run ./buildrun.sh to see the error messages
+        //    int count = DELAY;
+        //    while(count > 0)
+        //        count--;
+        //    */
+
+        //    /* this fails the same thing
+        //    for(int i = 0; i < DELAY; i++);
+        //    */
+        //    ++counter;
+        //}
 
         //node_counters[i] = counter;
         
         for(int k = 0; k < numofneighbour; k++){
             //counter = 0;
-            //float neighbor_rand_value = 0;
-            while (counter < 10000000 && atomic_load_explicit (&nodes_randvalues[nodes[indexarray[i] + k]], memory_order_acquire, memory_scope_all_svm_devices) == 0){
-            //while (counter < 10000000 && atomic_load (&nodes_randvalues[nodes[indexarray[i] + k]]) == 0){
+            while (counter < 1000000000 && atomic_load_explicit (&ready[nodes[indexarray[i] + k]], memory_order_acquire, memory_scope_all_svm_devices) != 1){
                 ++counter;
-                //neighbor_rand_value = nodes_randvalues[nodes[indexarray[i] + k]];
-                //neighbor_rand_value = atomic_load_explicit (&nodes_randvalues[nodes[indexarray[i] + k]], memory_order_acquire, memory_scope_all_svm_devices);
             }
-
+            //counter = 0;
+            //while(ready[nodes[indexarray[i] + k]] == 0){
+            //    //int count = DELAY;
+            //    //while(count > 0)
+            //    //    count--; 
+            //    //for(int i = 0; i < DELAY; i++);
+            //    ++counter;
+            //}
             //node_neighbor_counters[indexarray[i] + k] = counter;
             node_counters[i] = counter;
 
-            if( nodes_status[nodes[indexarray[i] + k]] == ACTIVE && 
-                atomic_load_explicit (&nodes_randvalues[i], memory_order_acquire, memory_scope_all_svm_devices) > atomic_load_explicit (&nodes_randvalues[nodes[indexarray[i] + k]], memory_order_acquire, memory_scope_all_svm_devices) )
+            if(nodes_status[nodes[indexarray[i] + k]] == ACTIVE && nodes_randvalues[i] > nodes_randvalues[nodes[indexarray[i] + k]]) 
             {
                 execute[i] = 0;
                 break;
@@ -79,7 +87,7 @@ __kernel void mis_parallel_async(__global int *nodes, volatile __global atomic_f
         execute[i] = 0;
 }
 
-__kernel void deactivate_neighbors(__global int *nodes, volatile __global atomic_int *nodes_status, volatile __global int *remaining_nodes, __global int* indexarray, __global int* execute) {
+__kernel void deactivate_neighbors(__global int *nodes, __global float *nodes_randvalues, volatile __global atomic_int *nodes_status, volatile __global int *remaining_nodes, __global int* indexarray, __global int* execute) {
     int i = get_global_id(0);
     
     int numofneighbour = indexarray[i+1] - indexarray[i];
