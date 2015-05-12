@@ -11,61 +11,6 @@ from generate_graph import *
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-#-------ONLY change this------------------------------------------------------------------------------------------------------------------------------------
-
-#---------guide::: test type
-testName = "runSomeSampleTests"
-#testName = "runTillFailure" 
-
-#---------guide::: algorithm type
-#algorithm = "serial"
-algorithm = "asyncParallel"
-#algorithm = "syncParallel"
-#algorithm = "all" #includes serial, synchronous parallel, and asynchrnous parallel, more might be added later
-
-#---------guide::: generated graph parameters 
-generateGraph = True 
-sparseRepFileName = "../../exotic_graphs/nlpkkt120.graph" #sparse representation of the graph
-
-numOfNodes = 20000
-numOfTests = 1 
-
-graphType = "completeChaos"
-#graphType = "dense"
-#graphType = "degreeBased"
-graphDegree = 50 
-
-
-#---------guide::: priming info
-doPrime = True
-primeNumber = 3
-primeFull = False
-
-
-#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#---------guide::: setting the variables appropirately based on the previous information
-if (doPrime):
-    if (primeFull):
-        primeNum = numOfNodes;
-    else:
-        primeNum = primeNumber
-else:
-    primeNumber = 0
-
-degree = 0
-if (graphType == "degreeBased"):
-    if (graphDegree > numOfNodes/1.5):
-        print "degree is too hight"
-        exit()
-    else: 
-        degree = graphDegree
-
-
-if (generateGraph):
-
-    sparseRepFileName = "sparse_rep.txt"
-
 
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -139,7 +84,7 @@ def runSyncParallel(sparseRepFileName, MISResultToVerifyFileNameParallel, logFil
 #---------guide::: test the synchrnous parallel code
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-def runAsyncParallel(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase):
+def runAsyncParallel(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCasek, primeNum):
     os.system("./buildasync.sh")
     os.system("./MIS_parallel_async" + " " + sparseRepFileName + " " + MISResultToVerifyFileNameParallel + " " + logFileName + " " + str(primeNum)); 
     logFilePtr = open(logFileName, "a");
@@ -225,6 +170,7 @@ def generateLogFileName():
 
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+print "hello"
 #---------guide::: tests the all code 
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -233,71 +179,77 @@ def runAll(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logF
     #---------guide:::  run serial test
     failed1 = runSerial(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase)
     #---------guide:::  run parallel test
-    failed3 = runAsyncParallel(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase)
+    failed3 = runAsyncParallel(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase, primeNum)
     return failed1 or failed2 or failed3
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-if (testName == "runSomeSampleTests"):
-    counter  = 0
-    for i in range (0, numOfTests):
-        #generate a graph       
-        if (generateGraph) :
-            while not(generate_random_graphs(numOfNodes, sparseRepFileName, graphType, int(degree))):
-                counter +=1; #this is just so that while has a body, but the point is that we need to run the generate random_graph till the result is 1
-        logFileName, logFileNameFailedCase = generateLogFileName()    
-        writeSparse(logFileName, sparseRepFileName) 
-#        
-        if (algorithm == "serial"): 
-            #---------guide:::  run serial test
-           runSerial(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase) 
-        elif (algorithm == "syncParallel"): 
-            #---------guide:::  run parallel
-            runSyncParallel(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase) 
-        elif (algorithm == "asyncParallel"): 
-            runAsyncParallel(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase)
-        elif(algorithm == "all"):
-            runAll(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase) 
-        else:
-            print "this algorithm is not acceptable" 
-            exit()
+
+#---------guide::: testing everything
+def testAll(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes, numOfTests, graphType, degree, doPrime, primeNum, primeFull):
+	if (testName == "runSomeSampleTests"):
+	    counter  = 0
+	    for i in range (0, numOfTests):
+	        #generate a graph       
+	        if (generateGraph) :
+	            while not(generate_random_graphs(numOfNodes, sparseRepFileName, graphType, int(degree))):
+	                counter +=1; #this is just so that while has a body, but the point is that we need to run the generate random_graph till the result is 1
+	        logFileName, logFileNameFailedCase = generateLogFileName()    
+	        writeSparse(logFileName, sparseRepFileName) 
+	#        
+	        if (algorithm == "serial"): 
+	            #---------guide:::  run serial test
+	           runSerial(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase) 
+	        elif (algorithm == "syncParallel"): 
+	            #---------guide:::  run parallel
+	            runSyncParallel(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase) 
+	        elif (algorithm == "asyncParallel"): 
+	            runAsyncParallel(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase, primeNum)
+	        elif(algorithm == "all"):
+	            runAll(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase) 
+	        else:
+	            print "this algorithm is not acceptable" 
+	            exit()
+	
+
+	if (testName == "runTillFailure"): 
+	    failed = 0
+	    counter  = 0
+	    while (not (failed)): 
+	        #generate a graph       
+	        if (generateGraph) :
+	            while not(generate_random_graphs(numOfNodes, sparseRepFileName, graphType, degree)):
+	                counter +=1; #this is just so that while has a body, but the point is that we need to run the generate random_graph till the result is 1
+	         
+	        logFileName, logFileNameFailedCase = generateLogFileName()    
+	        writeSparse(logFileName, sparseRepFileName) 
+	        if (algorithm == "serial"): 
+	            #---------guide:::  run serial test
+	           failed = runSerial(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase) 
+	        elif (algorithm == "syncParallel"): 
+	            #---------guide:::  run parallel
+	            failed = runSyncParallel(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase) 
+	        elif(algorithm == "all"):
+	            failed = runAll(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase) 
+	
+	        elif (algorithm == "asyncParallel"): 
+	            failed = runAsyncParallel(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase)
+	        else:
+	            print "this algorithm is not acceptable" 
+	            exit()
+	
+	        if (failed):
+	            logFileFailedCasePtr = open(logFileNameFailedCase, "a")
+	            logFilePtr = open(logFileName, "r")
+	            logFileFailedCasePtr.write(logFilePtr.read());
+	            logFilePtr.close()
+	            logFileFailedCasePtr.close(); 
+	            print "right here" 
+	            drawGraphDebug(logFileName)
+	#        else:
+	#            os.system("rm -r ./log")
+	#            os.system("rm -r ./log")
+	#
 
 
 
 
-if (testName == "runTillFailure"): 
-    failed = 0
-    counter  = 0
-    while (not (failed)): 
-        #generate a graph       
-        if (generateGraph) :
-            while not(generate_random_graphs(numOfNodes, sparseRepFileName, graphType, degree)):
-                counter +=1; #this is just so that while has a body, but the point is that we need to run the generate random_graph till the result is 1
-         
-        logFileName, logFileNameFailedCase = generateLogFileName()    
-        writeSparse(logFileName, sparseRepFileName) 
-        if (algorithm == "serial"): 
-            #---------guide:::  run serial test
-           failed = runSerial(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase) 
-        elif (algorithm == "syncParallel"): 
-            #---------guide:::  run parallel
-            failed = runSyncParallel(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase) 
-        elif(algorithm == "all"):
-            failed = runAll(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase) 
 
-        elif (algorithm == "asyncParallel"): 
-            failed = runAsyncParallel(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase)
-        else:
-            print "this algorithm is not acceptable" 
-            exit()
-
-        if (failed):
-            logFileFailedCasePtr = open(logFileNameFailedCase, "a")
-            logFilePtr = open(logFileName, "r")
-            logFileFailedCasePtr.write(logFilePtr.read());
-            logFilePtr.close()
-            logFileFailedCasePtr.close(); 
-            print "right here" 
-            drawGraphDebug(logFileName)
-#        else:
-#            os.system("rm -r ./log")
-#            os.system("rm -r ./log")
-#
