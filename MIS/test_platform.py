@@ -173,21 +173,27 @@ def generateLogFileName():
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #---------guide::: get timing information
 def getTimeInfo(fileName):
-    totalTime = 0
-    time = [] 
+    timeRand = [] 
+    timeKernel = [] 
+    totalTimeKernel = 0
+    totalTimeRand = 0
     with open(fileName) as f:
         for line in f:
             if len(line.strip().split()) > 0: 
-                if len(line.strip().split())==3:
-                    if (line.strip().split()[0]) == "Total" and (line.strip().split()[1]) == "time:":
-                        totalTime =  float(line.strip().split()[2])
+                if len(line.strip().split())==4:
+                    if (line.strip().split()[0]) == "Total" and (line.strip().split()[1]) == "time" and (line.strip().split()[2]) == "kernel:":
+                        totalTimeKernel =  float(line.strip().split()[3])
+                    if (line.strip().split()[0]) == "Total" and (line.strip().split()[1]) == "rand" and (line.strip().split()[2]) == "kernel:":
+                        totalTimeRand =  float(line.strip().split()[3])
                 elif len(line.strip().split())==2:
-                    if (line.strip().split()[0]) == "Time:":
-                        time += [float(line.strip().split()[1])]
-    if totalTime==0 or time == []:
+                    if (line.strip().split()[0]) == "timeKernel:":
+                        timeKernel += [float(line.strip().split()[1])]
+                    if (line.strip().split()[0]) == "timeRand:":
+                        timeRand += [float(line.strip().split()[1])]
+    if timeRand == [] or timeKernel ==[] or totalTimeKernel ==0 or totalTimeRand == 0:
         print "???????????????????????????????????????something went wrong.time was not calculated"
         exit()
-    return (totalTime, time) 
+    return (timeRand, timeKernel, totalTimeKernel, totalTimeRand)
 
 
 
@@ -265,8 +271,10 @@ def testOnce(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes, 
 	            print "right here" 
 	            drawGraphDebug(logFileName)
 	
-        totalTime, time = getTimeInfo(logFileName) 
-        return totalTime #retur totalTime for now
+        
+        timeRand, timeKernel, totalTimeKernel, totalTimeRand = getTimeInfo(logFileName) 
+        return (timeRand, timeKernel, totalTimeKernel, totalTimeRand) 
+    #retur totalTime for now
         #        else:
 	#            os.system("rm -r ./log")
 	#            os.system("rm -r ./log")
@@ -277,8 +285,10 @@ def testOnce(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes, 
 
 def testSweep(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes, numOfTests, graphType, degree, doPrime, primeNumLowBound,primeNumHighBound, primeStepSize, primeFull):
     #generate a graph       
-    totalTimeList = []
-    timeList = []
+    timeRandList = []
+    timeKernelList =[]
+    totalTimeKernelList =[]
+    totalTimeRandList =[]
     counter = 0 
     if (generateGraph) :
         while not(generate_random_graphs(numOfNodes, sparseRepFileName, graphType, int(degree))):
@@ -301,10 +311,12 @@ def testSweep(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes,
             print "this algorithm is not acceptable" 
             exit()
 
-        totalTimeThisRound, timeThisRound = getTimeInfo(logFileName) 
-        totalTimeList +=[totalTimeThisRound]
-        timeList += [timeThisRound]
-    return totalTimeList, timeList #retur totalTime for now
+        timeRandThisRound, timeKernelThisRound, totalTimeKernelThisRound, totalTimeRandThisRound = getTimeInfo(logFileName) 
+        timeRandList+= [timeRandThisRound]
+        timeKernelList+= [timeKernelThisRound]
+        totalTimeKernelList+= [totalTimeKernelThisRound]
+        totalTimeRandList+=[totalTimeRandThisRound]
+    return (timeRandList, timeKernelList, totalTimeKernelList, totalTimeRandList)
 	
 
 
