@@ -159,6 +159,7 @@ int main(int argc, char* argv[])
     }
     SDKTimer *sdk_timer = new SDKTimer();
     int timer = sdk_timer->createTimer();
+    int rand_timer = sdk_timer->createTimer();
 
 	/*Step1: Getting platforms and choose an available one.*/
 	cl_uint numPlatforms;	//the NO. of platforms
@@ -381,6 +382,7 @@ int main(int argc, char* argv[])
     int step = 0;
     cl_event ndrEvt;
     vector<double> step_times;
+    vector<double> rand_times;
     while (step < 10 && *gpu_remaining_nodes > 0){
         cout << "running step " << step << endl;
         std::fill_n(nodes_ready, numofnodes, 0);
@@ -389,11 +391,15 @@ int main(int argc, char* argv[])
         if (prime != 0)
             cout << "Randomizing " << prime << " elements for priming..." << endl;
 
+        sdk_timer->resetTimer(rand_timer);
+        sdk_timer->startTimer(rand_timer);
+
         for(int i = 0; i < prime; i++){
             nodes_randvalues[i]= static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/20));
             std::atomic_store_explicit ((std::atomic<int>*)&nodes_ready[i], 1, std::memory_order_release);
             //cout << nodes_randvalues[i] << endl;
         }
+        sdk_timer->stopTimer(rand_timer);
 
         // start timer
         sdk_timer->resetTimer(timer);
@@ -414,11 +420,16 @@ int main(int argc, char* argv[])
         status = clFlush(commandQueue);
         CHECK_OPENCL_ERROR(status, "clFlush failed.(commandQueue)");
 
+
+        sdk_timer->startTimer(rand_timer);
         for(int i = prime; i < numofnodes; i++){
             nodes_randvalues[i]= static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/20));
             std::atomic_store_explicit ((std::atomic<int>*)&nodes_ready[i], 1, std::memory_order_release);
             //cout << nodes_randvalues[i] << endl;
         }
+        sdk_timer->stopTimer(rand_timer);
+        cout << "randomization time: " << (double)(sdk_timer->readTimer(rand_timer)) << "s"  << endl;
+        rand_times.push_back((double)(sdk_timer->readTimer(rand_timer)));
 	    
         status = waitForEventAndRelease(&ndrEvt);
         CHECK_OPENCL_ERROR(status, "waitForEventAndRelease failed.(ndrEvt)");
@@ -444,7 +455,7 @@ int main(int argc, char* argv[])
         sdk_timer->stopTimer(timer);
 
         double step_time = (double)(sdk_timer->readTimer(timer));
-        cout << step_time  << "s" << endl;
+        cout << "kernel time " <<  step_time  << "s" << endl;
         step_times.push_back(step_time);
 
         cout << "remaining: " << *gpu_remaining_nodes << endl;
@@ -470,7 +481,7 @@ int main(int argc, char* argv[])
     //writing the test results
     writeToFileResult(nodes, index_array, nodes_status, numofnodes, logFileName);
     //writing the timing information
-    writeToFileTiming(step_times, numofnodes, logFileName);
+    writeToFileTiming(step_times, rand_times, numofnodes, logFileName);
 
 	/*Step 12: Clean the resources.*/
 	status = clReleaseKernel(mis_parallel_kernel);				//Release kernel.

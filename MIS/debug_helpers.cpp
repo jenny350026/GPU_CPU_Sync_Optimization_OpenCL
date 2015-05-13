@@ -220,20 +220,24 @@ void writeToFileResult(int *nodes, int *index_array, int *nodes_status,int numof
     myfile.close();
 }
 
-void writeToFileTiming(vector<double> step_times, int numofnodes, string fileName){
+void writeToFileTiming(vector<double> step_times, vector<double> rand_times, int numofnodes, string fileName){
     //open the file
     ofstream myfile;
     myfile.open (fileName.c_str(), std::ios_base::app);
 
-    double total_time = 0;
+    double total_kernel_time = 0;
+    double total_rand_time = 0;
     for(int i = 0; i < step_times.size(); ++i){
         //myfile << "Step [" << i << "] time " << step_times[i] << endl;
-        myfile << "Time: " << step_times[i] << endl;
-        total_time += step_times[i];
+        myfile << "timeKernel: " << step_times[i] << endl;
+        myfile << "timeRand: " << rand_times[i] << endl;
+        total_kernel_time += step_times[i];
+        total_rand_time += rand_times[i];
     }
 
     myfile << "Total steps: " << step_times.size() << endl;
-    myfile << "Total time: " << total_time << endl;
+    myfile << "Total time kernel: " << total_kernel_time << endl;
+    myfile << "Total rand kernel: " << total_rand_time << endl;
 
     myfile.close();
 }
