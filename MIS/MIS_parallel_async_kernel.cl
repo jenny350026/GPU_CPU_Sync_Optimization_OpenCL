@@ -41,40 +41,19 @@ __kernel void mis_parallel_async(__global int *nodes, __global float *nodes_rand
 
     if(nodes_status[i] == ACTIVE )
     {   
-        int counter = 0;
-        while (counter < 100000000 && atomic_load_explicit (&ready[i], memory_order_acquire, memory_scope_all_svm_devices) != 1){
-            ++counter;
-        }
-        //while(ready[i] == 0){
-        //    /* this fails at compile stage, uncomment and run ./buildrun.sh to see the error messages
-        //    int count = DELAY;
-        //    while(count > 0)
-        //        count--;
-        //    */
-
-        //    /* this fails the same thing
-        //    for(int i = 0; i < DELAY; i++);
-        //    */
-        //    ++counter;
+        //int counter = 0;
+        //while (/*counter < 100000000 &&*/ atomic_load_explicit (&ready[i], memory_order_acquire, memory_scope_all_svm_devices) != 1){
+        //    //++counter;
         //}
 
         //node_counters[i] = counter;
         
         for(int k = 0; k < numofneighbour; k++){
             //counter = 0;
-            while (counter < 10000000 && atomic_load_explicit (&ready[nodes[indexarray[i] + k]], memory_order_acquire, memory_scope_all_svm_devices) != 1){
-                ++counter;
-            }
-            //counter = 0;
-            //while(ready[nodes[indexarray[i] + k]] == 0){
-            //    //int count = DELAY;
-            //    //while(count > 0)
-            //    //    count--; 
-            //    //for(int i = 0; i < DELAY; i++);
-            //    ++counter;
+            //while (/*counter < 10000000 && */ atomic_load_explicit (&ready[nodes[indexarray[i] + k]], memory_order_acquire, memory_scope_all_svm_devices) != 1){
+            //    //++counter;
             //}
-            //node_neighbor_counters[indexarray[i] + k] = counter;
-            node_counters[i] = counter;
+            //node_counters[i] = counter;
 
             if(nodes_status[nodes[indexarray[i] + k]] == ACTIVE && nodes_randvalues[i] > nodes_randvalues[nodes[indexarray[i] + k]]) 
             {

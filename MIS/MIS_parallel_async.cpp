@@ -71,10 +71,10 @@ int read_input_file(string filename, cl_int **addr_node_array, cl_int **addr_ind
     //int* node_array = new int[total_numofneighbors * 2]; //neighbours of each vertex, CSR representation
     //int* index_array = new cl_int[numofnodes + 1]; //index values(address values) for each node, CSR representation
 
-    cl_int* node_array = (int*) clSVMAlloc(*context, CL_MEM_SVM_FINE_GRAIN_BUFFER, (total_numofneighbors*2)*sizeof(int), 4);
+    cl_int* node_array = (int*) clSVMAlloc(*context, CL_MEM_SVM_FINE_GRAIN_BUFFER, (total_numofneighbors*2)*sizeof(int), 0);
     CHECK_ALLOCATION(node_array, "Failed to allocate SVM memory. (node_array)");
 
-    cl_int* index_array = (int*) clSVMAlloc(*context, CL_MEM_SVM_FINE_GRAIN_BUFFER, (numofnodes+1)*sizeof(int), 4);
+    cl_int* index_array = (int*) clSVMAlloc(*context, CL_MEM_SVM_FINE_GRAIN_BUFFER, (numofnodes+1)*sizeof(int), 0);
     CHECK_ALLOCATION(index_array, "Failed to allocate SVM memory. (index_array)");
 
     int node_index = 0;
@@ -241,25 +241,26 @@ int main(int argc, char* argv[])
 #endif
 
     // set up execute, random, status, ready and counter arrays
-    cl_int* nodes_execute = (int*) clSVMAlloc(context, CL_MEM_SVM_FINE_GRAIN_BUFFER, numofnodes*sizeof(int), 4);
+    cl_int* nodes_execute = (int*) clSVMAlloc(context, CL_MEM_SVM_FINE_GRAIN_BUFFER, numofnodes*sizeof(int), 0);
     CHECK_ALLOCATION(nodes_execute, "Failed to allocate SVM memory. (nodes_execute)");
     std::fill_n(nodes_execute, numofnodes, 1);
 
-    cl_float *nodes_randvalues = (float*) clSVMAlloc(context, CL_MEM_SVM_FINE_GRAIN_BUFFER, numofnodes*sizeof(float), 4);
+    cl_float *nodes_randvalues = (float*) clSVMAlloc(context, CL_MEM_SVM_FINE_GRAIN_BUFFER, numofnodes*sizeof(float), 0);
     CHECK_ALLOCATION(nodes_randvalues, "Failed to allocate SVM memory. (nodes_randvalues)");
-    srand (static_cast <unsigned> (time(0)));
+    srand (20);
+    //srand (static_cast <unsigned> (time(0)));
     //for(int i = 0; i < numofnodes; i++)
     //    nodes_randvalues[i]= static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/20));
 
-    cl_int* nodes_status = (int*) clSVMAlloc(context, CL_MEM_SVM_FINE_GRAIN_BUFFER|CL_MEM_SVM_ATOMICS, numofnodes*sizeof(int), 4);
+    cl_int* nodes_status = (int*) clSVMAlloc(context, CL_MEM_SVM_FINE_GRAIN_BUFFER|CL_MEM_SVM_ATOMICS, numofnodes*sizeof(int), 0);
     CHECK_ALLOCATION(nodes_status, "Failed to allocate SVM memory. (nodes_status)");
     std::fill_n(nodes_status, numofnodes, ACTIVE);
 
-    cl_int* nodes_ready = (int*) clSVMAlloc(context, CL_MEM_SVM_FINE_GRAIN_BUFFER|CL_MEM_SVM_ATOMICS, numofnodes*sizeof(int), 4);
+    cl_int* nodes_ready = (int*) clSVMAlloc(context, CL_MEM_SVM_FINE_GRAIN_BUFFER|CL_MEM_SVM_ATOMICS, numofnodes*sizeof(int), 0);
     CHECK_ALLOCATION(nodes_ready, "Failed to allocate SVM memory. (nodes_ready)");
     std::fill_n(nodes_ready, numofnodes, 0);
 
-    cl_int* nodes_counter = (int*) clSVMAlloc(context, CL_MEM_SVM_FINE_GRAIN_BUFFER, numofnodes*sizeof(int), 4);
+    cl_int* nodes_counter = (int*) clSVMAlloc(context, CL_MEM_SVM_FINE_GRAIN_BUFFER, numofnodes*sizeof(int), 0);
     CHECK_ALLOCATION(nodes_counter, "Failed to allocate SVM memory. (nodes_execute)");
 
     //cl_int* nodes_neighbor_counter = (int*) clSVMAlloc(context, CL_MEM_SVM_FINE_GRAIN_BUFFER, numofedges*2*sizeof(int), 4);
@@ -275,7 +276,7 @@ int main(int argc, char* argv[])
     }
 #endif
 
-    cl_int* gpu_remaining_nodes = (int*) clSVMAlloc(context, CL_MEM_SVM_FINE_GRAIN_BUFFER|CL_MEM_SVM_ATOMICS, sizeof(int), 4);
+    cl_int* gpu_remaining_nodes = (int*) clSVMAlloc(context, CL_MEM_SVM_FINE_GRAIN_BUFFER|CL_MEM_SVM_ATOMICS, sizeof(int), 0);
     CHECK_ALLOCATION(gpu_remaining_nodes, "Failed to allocate SVM memory. (gpu_remaining_nodes)");
     *gpu_remaining_nodes = numofnodes;
 
@@ -375,7 +376,7 @@ int main(int argc, char* argv[])
 
     // Set Global and Local work items
     size_t globalWorkItems = numofnodes; //total number of threads
-    size_t localWorkItems = 64; //number of threads within a work group
+    size_t localWorkItems = 256; //number of threads within a work group
 
      //launching the kernel
 
@@ -396,7 +397,7 @@ int main(int argc, char* argv[])
 
         for(int i = 0; i < prime; i++){
             nodes_randvalues[i]= static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/20));
-            std::atomic_store_explicit ((std::atomic<int>*)&nodes_ready[i], 1, std::memory_order_release);
+            //std::atomic_store_explicit ((std::atomic<int>*)&nodes_ready[i], 1, std::memory_order_release);
             //cout << nodes_randvalues[i] << endl;
         }
         sdk_timer->stopTimer(rand_timer);
@@ -424,15 +425,15 @@ int main(int argc, char* argv[])
         sdk_timer->startTimer(rand_timer);
         for(int i = prime; i < numofnodes; i++){
             nodes_randvalues[i]= static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/20));
-            std::atomic_store_explicit ((std::atomic<int>*)&nodes_ready[i], 1, std::memory_order_release);
+            //std::atomic_store_explicit ((std::atomic<int>*)&nodes_ready[i], 1, std::memory_order_release);
             //cout << nodes_randvalues[i] << endl;
         }
         sdk_timer->stopTimer(rand_timer);
-        cout << "randomization time: " << (double)(sdk_timer->readTimer(rand_timer)) << "s"  << endl;
+        //cout << "randomization time: " << (double)(sdk_timer->readTimer(rand_timer)) << "s"  << endl;
         rand_times.push_back((double)(sdk_timer->readTimer(rand_timer)));
 	    
-        status = waitForEventAndRelease(&ndrEvt);
-        CHECK_OPENCL_ERROR(status, "waitForEventAndRelease failed.(ndrEvt)");
+        //status = waitForEventAndRelease(&ndrEvt);
+        //CHECK_OPENCL_ERROR(status, "waitForEventAndRelease failed.(ndrEvt)");
 
         status = clEnqueueNDRangeKernel(
                      commandQueue,
@@ -449,8 +450,8 @@ int main(int argc, char* argv[])
         status = clFlush(commandQueue);
         CHECK_OPENCL_ERROR(status, "clFlush failed.(commandQueue)");
 
-        status = waitForEventAndRelease(&ndrEvt);
-        CHECK_OPENCL_ERROR(status, "waitForEventAndRelease failed.(ndrEvt)");
+        //status = waitForEventAndRelease(&ndrEvt);
+        //CHECK_OPENCL_ERROR(status, "waitForEventAndRelease failed.(ndrEvt)");
 
         sdk_timer->stopTimer(timer);
 
