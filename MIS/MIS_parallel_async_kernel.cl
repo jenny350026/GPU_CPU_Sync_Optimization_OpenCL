@@ -42,17 +42,17 @@ __kernel void mis_parallel_async(__global int *nodes, __global float *nodes_rand
     if(nodes_status[i] == ACTIVE )
     {   
         //int counter = 0;
-        //while (/*counter < 100000000 &&*/ atomic_load_explicit (&ready[i], memory_order_acquire, memory_scope_all_svm_devices) != 1){
-        //    //++counter;
-        //}
+        while (/*counter < 100000000 &&*/ atomic_load_explicit (&ready[i], memory_order_acquire, memory_scope_all_svm_devices) != 1){
+            //++counter;
+        }
 
         //node_counters[i] = counter;
         
         for(int k = 0; k < numofneighbour; k++){
             //counter = 0;
-            //while (/*counter < 10000000 && */ atomic_load_explicit (&ready[nodes[indexarray[i] + k]], memory_order_acquire, memory_scope_all_svm_devices) != 1){
-            //    //++counter;
-            //}
+            while (/*counter < 10000000 && */ atomic_load_explicit (&ready[nodes[indexarray[i] + k]], memory_order_acquire, memory_scope_all_svm_devices) != 1){
+                //++counter;
+            }
             //node_counters[i] = counter;
 
             if(nodes_status[nodes[indexarray[i] + k]] == ACTIVE && nodes_randvalues[i] > nodes_randvalues[nodes[indexarray[i] + k]]) 

@@ -397,7 +397,7 @@ int main(int argc, char* argv[])
 
         for(int i = 0; i < prime; i++){
             nodes_randvalues[i]= static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/20));
-            //std::atomic_store_explicit ((std::atomic<int>*)&nodes_ready[i], 1, std::memory_order_release);
+            std::atomic_store_explicit ((std::atomic<int>*)&nodes_ready[i], 1, std::memory_order_release);
             //cout << nodes_randvalues[i] << endl;
         }
         sdk_timer->stopTimer(rand_timer);
@@ -421,11 +421,10 @@ int main(int argc, char* argv[])
         status = clFlush(commandQueue);
         CHECK_OPENCL_ERROR(status, "clFlush failed.(commandQueue)");
 
-
         sdk_timer->startTimer(rand_timer);
         for(int i = prime; i < numofnodes; i++){
             nodes_randvalues[i]= static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/20));
-            //std::atomic_store_explicit ((std::atomic<int>*)&nodes_ready[i], 1, std::memory_order_release);
+            std::atomic_store_explicit ((std::atomic<int>*)&nodes_ready[i], 1, std::memory_order_release);
             //cout << nodes_randvalues[i] << endl;
         }
         sdk_timer->stopTimer(rand_timer);
@@ -450,8 +449,8 @@ int main(int argc, char* argv[])
         status = clFlush(commandQueue);
         CHECK_OPENCL_ERROR(status, "clFlush failed.(commandQueue)");
 
-        //status = waitForEventAndRelease(&ndrEvt);
-        //CHECK_OPENCL_ERROR(status, "waitForEventAndRelease failed.(ndrEvt)");
+        status = waitForEventAndRelease(&ndrEvt);
+        CHECK_OPENCL_ERROR(status, "waitForEventAndRelease failed.(ndrEvt)");
 
         sdk_timer->stopTimer(timer);
 
