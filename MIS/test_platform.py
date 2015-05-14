@@ -345,7 +345,7 @@ def  testSweep(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes
                 print "this algorithm is not acceptable" 
                 exit()
    
-            timeRandthisRoundtimeKernelThisRound, timeRandThisRound, timeKernelThisRound, totalTimeKernelThisRound, totalTimeRandThisRound = getTimeInfo(logFileName) 
+            timeRandThisRoundtimeKernelThisRound, timeRandThisRound, timeKernelThisRound, totalTimeKernelThisRound, totalTimeRandThisRound = getTimeInfo(logFileName) 
             timeRandList+= [timeRandThisRound]
             timeKernelList+= [timeKernelThisRound]
             timeRandtimeKernelList+= [timeRandThisRoundtimeKernelThisRound]
