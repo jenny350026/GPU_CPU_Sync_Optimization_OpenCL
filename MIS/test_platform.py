@@ -262,14 +262,13 @@ def testOnce(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes, 
 	        elif (algorithm == "asyncParallel"): 
 	            runAsyncParallel(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase, primeNum)
                 elif (algorithm == "splitThread"): 
-	            runSplitThread(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase, splitNum)
+                    runSplitThread(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase, splitNum)
                 elif(algorithm == "all"):
-	            runAll(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase) 
+                    runAll(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase) 
 	        else:
-	            print "this algorithm is not acceptable" 
+                    print "this algorithm is not acceptable" 
 	            exit()
 	
-
 	if (testName == "runTillFailure"): 
 	    failed = 0
 	    counter  = 0
@@ -289,11 +288,10 @@ def testOnce(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes, 
 	            failed = runSyncParallel(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase) 
 	        elif(algorithm == "all"):
 	            failed = runAll(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase) 
-	
 	        elif (algorithm == "asyncParallel"): 
 	            failed = runAsyncParallel(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase)
 	        else:
-	            print "this algorithm is not acceptable" 
+                    print "this algorithm is not acceptable" 
 	            exit()
 	
 	        if (failed):
@@ -344,19 +342,25 @@ def  testSweep(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes
             else:
                 print "this algorithm is not acceptable" 
                 exit()
+   
+	    timeRandThisRound, timeKernelThisRound, totalTimeKernelThisRound, totalTimeRandThisRound = getTimeInfo(logFileName) 
+	    timeRandList+= [timeRandThisRound]
+	    timeKernelList+= [timeKernelThisRound]
+	    totalTimeKernelList+= [(primeNum,totalTimeKernelThisRound)]
+	    totalTimeRandList+=[(primeNum,totalTimeRandThisRound)]
     if (doSplit):
         for splitNum in range(splitNumLowBound, splitNumHighBound, splitStepSize):	
-            if (algorithm == "splitThrad"): 
-                runsplitThread(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase, splitNum)
+            if (algorithm == "splitThread"): 
+                runSplitThread(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase, splitNum)
             else:
                 print "this algorithm is not acceptable" 
                 exit()
 
-    timeRandThisRound, timeKernelThisRound, totalTimeKernelThisRound, totalTimeRandThisRound = getTimeInfo(logFileName) 
-    timeRandList+= [timeRandThisRound]
-    timeKernelList+= [timeKernelThisRound]
-    totalTimeKernelList+= [totalTimeKernelThisRound]
-    totalTimeRandList+=[totalTimeRandThisRound]
+            timeRandThisRound, timeKernelThisRound, totalTimeKernelThisRound, totalTimeRandThisRound = getTimeInfo(logFileName) 
+            timeRandList+= [timeRandThisRound]
+            timeKernelList+= [timeKernelThisRound]
+            totalTimeKernelList+= [(splitNum,totalTimeKernelThisRound)]
+	    totalTimeRandList+=[(splitNum,totalTimeRandThisRound)]
     return (timeRandList, timeKernelList, totalTimeKernelList, totalTimeRandList)
 	
 

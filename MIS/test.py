@@ -11,13 +11,15 @@ testName = "runSomeSampleTests"
 
 #---------guide::: algorithm type
 #algorithm = "serial"
-#algorithm = "asyncParallel"
+algorithm = "asyncParallel"
 #algorithm = "syncParallel"
-algorithm = "splitThread"
+#algorithm = "splitThread"
 #algorithm = "all" #includes serial, synchronous parallel, and asynchrnous parallel, more might be added later
 
 #---------guide::: generated graph parameters 
 generateGraph = False
+#sparseRepFileName = "../../exotic_graphs/nlpkkt120.graph" #sparse representation of the graph
+sparseRepFileName = "../../exotic_graphs/af_shell9.graph" #sparse representation of the graph
 sparseRepFileName = "../../original_inputfiles/af_shell9.graph" #sparse representation of the graph
 
 numOfNodes = 504855
@@ -30,33 +32,26 @@ degree = 20
 
 
 #---------guide::: priming info
-#doPrime = True
-doPrime = False
+doPrime = True
 primeNumber = 3
-primeFull = True
+primeFull = False
 
 
-<<<<<<< Updated upstream
 #---------guide::: sweepPrime or only test once
-#sweepPrime = True #if this is set to true, then we sweepPrime the space with different prime numbers between primeNumLowBound and HighBound given bellow
-sweepPrime = False #if false, runs the test only once
+sweepPrime = True #if this is set to true, then we sweepPrime the space with different prime numbers between primeNumLowBound and HighBound given bellow
 #set the following variables if sweepPrime is through
-primeNumLowBound = 20
-=======
-#---------guide::: sweep or only test once
-sweep = False #if this is set to true, then we sweep the space with different prime numbers between primeNumLowBound and HighBound given bellow
-#sweep = False #if false, runs the test only once
-#set the following variables if sweep is through
 primeNumLowBound = 400000
->>>>>>> Stashed changes
 primeNumHighBound = numOfNodes
 primeStepSize =   25000
 
-doSplit = True
-#doSplit = False
+#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#---------guide::: sweepSplit
+
+
+doSplit = False 
 splitNumber = 10
-#sweepSplit = True
-sweepSplit = False
+
+sweepSplit = False 
 splitNumLowBound = 10
 splitNumHighBound = 65
 splitStepSize = 20 
@@ -83,6 +78,13 @@ if (doSplit):
 else:
     splitNum = 0
 
+
+if (algorithm == "asyncParallel" and (doSplit or sweepSplit)):
+    print "you can not run asyncparallel with doSplit or sweepPrim, pick splitThread"
+    exit()
+if (algorithm == "splitThread" and (doPrime or sweepPrime)):
+    print "you can not run asyncparallel with doSplit or sweepPrim, pick splitThread"
+    exit()
 
 
 if (doPrime and doSplit):
