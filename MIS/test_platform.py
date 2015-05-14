@@ -225,7 +225,7 @@ def getTimeInfo(fileName):
     if timeRand == [] or timeKernel ==[] or totalTimeKernel ==0 or totalTimeRand == 0:
         print "???????????????????????????????????????something went wrong.time was not calculated"
         exit()
-    return (timeRand, timeKernel, totalTimeKernel, totalTimeRand)
+    return (sum(map(list,zip(timeRand,timeKernel)),[]), timeRand, timeKernel, totalTimeKernel, totalTimeRand)
 
 
 
@@ -304,8 +304,8 @@ def testOnce(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes, 
 	            drawGraphDebug(logFileName)
 	
         
-        timeRand, timeKernel, totalTimeKernel, totalTimeRand = getTimeInfo(logFileName) 
-        return (timeRand, timeKernel, totalTimeKernel, totalTimeRand, totalTimeKernel+totalTimeRand) 
+        timeRandtimeKernel, timeRand, timeKernel, totalTimeKernel, totalTimeRand = getTimeInfo(logFileName) 
+        return (timeRandtimeKernel, timeRand, timeKernel, totalTimeKernel, totalTimeRand, totalTimeKernel+totalTimeRand) 
     #retur totalTime for now
         #        else:
 	#            os.system("rm -r ./log")
@@ -319,6 +319,7 @@ def  testSweep(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes
     #generate a graph       
     timeRandList = []
     timeKernelList =[]
+    timeRandtimeKernelList =[]
     totalTimeKernelList =[]
     totalTimeRandList =[]
     totalTimeAdded = [] 
@@ -332,7 +333,7 @@ def  testSweep(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes
         for primeNum in range(primeNumLowBound, primeNumHighBound, primeStepSize):	
             if (algorithm == "serial"): 
                 #---------guide:::  run serial test
-                    runSerial(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase) 
+                runSerial(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase) 
             elif (algorithm == "syncParallel"): 
                 #---------guide:::  run parallel
                 runSyncParallel(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase) 
@@ -344,12 +345,13 @@ def  testSweep(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes
                 print "this algorithm is not acceptable" 
                 exit()
    
-	    timeRandThisRound, timeKernelThisRound, totalTimeKernelThisRound, totalTimeRandThisRound = getTimeInfo(logFileName) 
-	    timeRandList+= [timeRandThisRound]
-	    timeKernelList+= [timeKernelThisRound]
-	    totalTimeKernelList+= [(primeNum,totalTimeKernelThisRound)]
-	    totalTimeRandList+=[(primeNum,totalTimeRandThisRound)]
-	    totalTimeAdded +=[(primeNum,totalTimeRandThisRound + totalTimeKernelThisRound)]
+            timeRandthisRoundtimeKernelThisRound, timeRandThisRound, timeKernelThisRound, totalTimeKernelThisRound, totalTimeRandThisRound = getTimeInfo(logFileName) 
+            timeRandList+= [timeRandThisRound]
+            timeKernelList+= [timeKernelThisRound]
+            timeRandtimeKernelList+= [timeRandThisRoundtimeKernelThisRound]
+            totalTimeKernelList+= [(primeNum,totalTimeKernelThisRound)]
+            totalTimeRandList+=[(primeNum,totalTimeRandThisRound)]
+            totalTimeAdded +=[(primeNum,totalTimeRandThisRound + totalTimeKernelThisRound)]
     if (doSplit):
         for splitNum in range(splitNumLowBound, splitNumHighBound, splitStepSize):	
             if (algorithm == "splitThread"): 
@@ -357,14 +359,15 @@ def  testSweep(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes
             else:
                 print "this algorithm is not acceptable" 
                 exit()
-
-            timeRandThisRound, timeKernelThisRound, totalTimeKernelThisRound, totalTimeRandThisRound = getTimeInfo(logFileName) 
-            timeRandList+= [timeRandThisRound]
-            timeKernelList+= [timeKernelThisRound]
-            totalTimeKernelList+= [(splitNum,totalTimeKernelThisRound)]
-	    totalTimeRandList+=[(splitNum,totalTimeRandThisRound)]
-	    totalTimeAdded +=[(splitNum,totalTimeRandThisRound + totalTimeKernelThisRound)]
-    return (timeRandList, timeKernelList, totalTimeKernelList, totalTimeRandList, totalTimeAdded)
+	
+	        timeRandThisRoundtimeKernelThisRound, timeRandThisRound, timeKernelThisRound, totalTimeKernelThisRound, totalTimeRandThisRound = getTimeInfo(logFileName) 
+	        timeRandList+= [timeRandThisRound]
+	        timeKernelList+= [timeKernelThisRound]
+	        timeRandtimeKernelList+= [timeRandThisRoundtimeKernelThisRound]
+	        totalTimeKernelList+= [(splitNum,totalTimeKernelThisRound)]
+	        totalTimeRandList+=[(splitNum,totalTimeRandThisRound)]
+	        totalTimeAdded +=[(splitNum,totalTimeRandThisRound + totalTimeKernelThisRound)]
+    return (timeRandtimeKernelList, timeRandList, timeKernelList, totalTimeKernelList, totalTimeRandList, totalTimeAdded)
 	
 
 

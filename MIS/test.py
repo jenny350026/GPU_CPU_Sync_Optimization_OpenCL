@@ -19,10 +19,11 @@ algorithm = "asyncParallel"
 #---------guide::: generated graph parameters 
 generateGraph = False
 #sparseRepFileName = "../../exotic_graphs/nlpkkt120.graph" #sparse representation of the graph
-sparseRepFileName = "../../exotic_graphs/af_shell9.graph" #sparse representation of the graph
-sparseRepFileName = "../../original_inputfiles/af_shell9.graph" #sparse representation of the graph
+#sparseRepFileName = "../../exotic_graphs/af_shell9.graph" #sparse representation of the graph
+#sparseRepFileName = "../../original_inputfiles/af_shell9.graph" #sparse representation of the graph
+sparseRepFileName = "../../original_inputfiles/nlpkkt120.graph" #sparse representation of the graph
 
-numOfNodes = 504855
+numOfNodes = 3542400
 numOfTests = 1 
 
 #graphType = "completeChaos" #the graph is completely random, meaning the degree is not set
@@ -34,21 +35,21 @@ degree = 20
 #---------guide::: priming info
 doPrime = True
 primeNumber = 3
-primeFull = False
+primeFull = True
 
 
 #---------guide::: sweepPrime or only test once
-sweepPrime = True#if this is set to true, then we sweepPrime the space with different prime numbers between primeNumLowBound and HighBound given bellow
+sweepPrime = False#if this is set to true, then we sweepPrime the space with different prime numbers between primeNumLowBound and HighBound given bellow
 #set the following variables if sweepPrime is through
-primeNumLowBound = 400000
-primeNumHighBound = numOfNodes
-primeStepSize =   25000
+primeNumLowBound = 3424000
+primeNumHighBound = 3434000
+primeStepSize =   2000
 
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #---------guide::: sweepSplit
 
 
-doSplit = False 
+doSplit = False
 splitNumber = 10
 
 sweepSplit = False 
@@ -123,17 +124,20 @@ if (generateGraph):
 #---------guide::: testing everything
 
 if (sweepPrime or sweepSplit):
-    timeRand, timeKernel, totalTimeKernel, totalTimeRand, totalTimesAdded = testSweep(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes, numOfTests, graphType, degree, doPrime, primeNumLowBound,primeNumHighBound, primeStepSize, primeFull, splitNumLowBound, splitNumHighBound, doSplit, splitStepSize)
+    timeRandtimeKernel, timeRand, timeKernel, totalTimeKernel, totalTimeRand, totalTimesAdded = testSweep(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes, numOfTests, graphType, degree, doPrime, primeNumLowBound,primeNumHighBound, primeStepSize, primeFull, splitNumLowBound, splitNumHighBound, doSplit, splitStepSize)
     print "timeRand is" + str(timeRand)
     print "timeKernel is" + str(timeKernel)
+    print "timeRandtimeKernel is " + str(timeRandtimeKernel)
     print "totalTimeKernel is " + str(totalTimeKernel)
     print "totalTimeRand is " + str(totalTimeRand)
     print "total Times Added is " + str(totalTimesAdded)
 else:
-    timeRand, timeKernel, totalTimeKernel, totalTimeRand ,totalTimesAdded =  testOnce(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes, numOfTests, graphType, degree, doPrime, primeNum, primeFull, doSplit, splitNum)
+    timeRandtimeKernel, timeRand, timeKernel, totalTimeKernel, totalTimeRand ,totalTimesAdded =  testOnce(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes, numOfTests, graphType, degree, doPrime, primeNum, primeFull, doSplit, splitNum)
 
     print "timeRand is" + str(timeRand)
     print "timeKernel is" + str(timeKernel)
+    print "timeRandtimeKernel is " + str(timeRandtimeKernel)
+    print "totalTimeKernel is " + str(totalTimeKernel)
     print "totalTimeKernel is " + str(totalTimeKernel)
     print "totalTimeRand is " + str(totalTimeRand)
     print "total Times Added is " + str(totalTimesAdded)
