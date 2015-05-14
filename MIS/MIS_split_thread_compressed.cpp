@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
     string inFilename; 
     string logFileName;
     string counterFileName;
-    int prime = 0;
+    int split = 0;
     if (argc <= 3) {
         cout << "not enough arguments" << endl;
         cout <<" you need to provide the sparse graph file name and then desired output file name and a logfile name"<<endl; 
@@ -154,7 +154,7 @@ int main(int argc, char* argv[])
 
     if ( argc >= 6 ){
         stringstream ss(argv[5]);
-        ss >> prime;
+        ss >> split;
     }
     SDKTimer *sdk_timer = new SDKTimer();
     int step_timer = sdk_timer->createTimer();
@@ -202,8 +202,8 @@ int main(int argc, char* argv[])
 	cl_context context = clCreateContext(NULL,1, devices,NULL,NULL,NULL);
 	
 	/* Creating command queue associate with the context.*/
-    int numQueues = 4;
-    int totalNumOfSplit = 4;
+    int numQueues = split;
+    int totalNumOfSplit = split;
     
     cl_command_queue *commandQueues = new cl_command_queue[numQueues];
     for (int queueCount =0; queueCount <numQueues; queueCount++){
@@ -408,10 +408,10 @@ int main(int argc, char* argv[])
         cout << "**** Running iteration" << step << " ***"<< endl;
         std::fill_n(nodes_ready, numofnodes, 0);
 
-        //if (prime != 0)
+        //if (split != 0)
         sdk_timer->resetTimer(step_timer);
         sdk_timer->resetTimer(rand_timer);
-            //cout << " Prime enabled with = " << prime << endl;
+            //cout << " Prime enabled with = " << split << endl;
         for (int splitNumber =0; splitNumber < totalNumOfSplit; splitNumber++) {
             //cout <<"number of threads lunched for the step number " << splitNumber << "is "<<globalWorkItems[splitNumber]<<endl; 
             int end = (splitNumber != totalNumOfSplit - 1)? (*(splitNums[splitNumber]) + 1)*(*splitSize):numofnodes;

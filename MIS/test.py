@@ -20,8 +20,9 @@ algorithm = "splitThread"
 generateGraph = False
 #sparseRepFileName = "../../exotic_graphs/nlpkkt120.graph" #sparse representation of the graph
 sparseRepFileName = "../../exotic_graphs/af_shell9.graph" #sparse representation of the graph
+sparseRepFileName = "../../original_inputfiles/af_shell9.graph" #sparse representation of the graph
 
-numOfNodes = 80
+numOfNodes = 504855
 numOfTests = 1 
 
 #graphType = "completeChaos" #the graph is completely random, meaning the degree is not set
@@ -34,7 +35,7 @@ degree = 20
 #doPrime = True
 doPrime = False
 primeNumber = 3
-primeFull = False
+primeFull = True
 
 
 #---------guide::: sweepPrime or only test once
@@ -42,8 +43,13 @@ primeFull = False
 sweepPrime = False #if false, runs the test only once
 #set the following variables if sweepPrime is through
 primeNumLowBound = 20
+#---------guide::: sweep or only test once
+sweep = False #if this is set to true, then we sweep the space with different prime numbers between primeNumLowBound and HighBound given bellow
+#sweep = False #if false, runs the test only once
+#set the following variables if sweep is through
+primeNumLowBound = 400000
 primeNumHighBound = numOfNodes
-primeStepSize =   20 
+primeStepSize =   25000
 
 doSplit = True
 #doSplit = False
