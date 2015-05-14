@@ -14,4 +14,4 @@ g++ -std=c++11 -c debug_helpers.cpp  -o debug_helpers.o -I ./ -I$AMDAPPSDKROOT/i
 echo "Removing previous executable MIS_split_thread" 
 if [ -f MIS_split_thread ] ; then rm MIS_split_thread ; fi
 echo "g++ -std=c++11 -o MIS_split_thread MIS_split_thread.o  debug_helpers.o -lOpenCL -L$AMDAPPSDKROOT/lib/x86_64"
-g++ -std=c++11 -o MIS_split_thread MIS_split_thread.o  debug_helpers.o -lOpenCL -L$AMDAPPSDKROOT/lib/x86_64
+g++ -g -std=c++11 -o MIS_split_thread MIS_split_thread.o  debug_helpers.o -lOpenCL -L$AMDAPPSDKROOT/lib/x86_64
