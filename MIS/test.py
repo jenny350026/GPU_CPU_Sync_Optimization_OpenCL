@@ -38,7 +38,7 @@ primeFull = False
 
 
 #---------guide::: sweepPrime or only test once
-sweepPrime = True #if this is set to true, then we sweepPrime the space with different prime numbers between primeNumLowBound and HighBound given bellow
+sweepPrime = True#if this is set to true, then we sweepPrime the space with different prime numbers between primeNumLowBound and HighBound given bellow
 #set the following variables if sweepPrime is through
 primeNumLowBound = 400000
 primeNumHighBound = numOfNodes
@@ -123,17 +123,18 @@ if (generateGraph):
 #---------guide::: testing everything
 
 if (sweepPrime or sweepSplit):
-    timeRand, timeKernel, totalTimeKernel, totalTimeRand = testSweep(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes, numOfTests, graphType, degree, doPrime, primeNumLowBound,primeNumHighBound, primeStepSize, primeFull, splitNumLowBound, splitNumHighBound, doSplit, splitStepSize)
+    timeRand, timeKernel, totalTimeKernel, totalTimeRand, totalTimesAdded = testSweep(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes, numOfTests, graphType, degree, doPrime, primeNumLowBound,primeNumHighBound, primeStepSize, primeFull, splitNumLowBound, splitNumHighBound, doSplit, splitStepSize)
     print "timeRand is" + str(timeRand)
     print "timeKernel is" + str(timeKernel)
     print "totalTimeKernel is " + str(totalTimeKernel)
     print "totalTimeRand is " + str(totalTimeRand)
+    print "total Times Added is " + str(totalTimesAdded)
 else:
-    timeRand, timeKernel, totalTimeKernel, totalTimeRand =  testOnce(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes, numOfTests, graphType, degree, doPrime, primeNum, primeFull, doSplit, splitNum)
+    timeRand, timeKernel, totalTimeKernel, totalTimeRand ,totalTimesAdded =  testOnce(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes, numOfTests, graphType, degree, doPrime, primeNum, primeFull, doSplit, splitNum)
 
     print "timeRand is" + str(timeRand)
     print "timeKernel is" + str(timeKernel)
     print "totalTimeKernel is " + str(totalTimeKernel)
     print "totalTimeRand is " + str(totalTimeRand)
-
+    print "total Times Added is " + str(totalTimesAdded)
 

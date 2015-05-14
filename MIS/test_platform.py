@@ -305,7 +305,7 @@ def testOnce(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes, 
 	
         
         timeRand, timeKernel, totalTimeKernel, totalTimeRand = getTimeInfo(logFileName) 
-        return (timeRand, timeKernel, totalTimeKernel, totalTimeRand) 
+        return (timeRand, timeKernel, totalTimeKernel, totalTimeRand, totalTimeKernel+totalTimeRand) 
     #retur totalTime for now
         #        else:
 	#            os.system("rm -r ./log")
@@ -321,6 +321,7 @@ def  testSweep(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes
     timeKernelList =[]
     totalTimeKernelList =[]
     totalTimeRandList =[]
+    totalTimeAdded = [] 
     counter = 0 
     if (generateGraph) :
         while not(generate_random_graphs(numOfNodes, sparseRepFileName, graphType, int(degree))):
@@ -348,6 +349,7 @@ def  testSweep(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes
 	    timeKernelList+= [timeKernelThisRound]
 	    totalTimeKernelList+= [(primeNum,totalTimeKernelThisRound)]
 	    totalTimeRandList+=[(primeNum,totalTimeRandThisRound)]
+	    totalTimeAdded +=[(primeNum,totalTimeRandThisRound + totalTimeKernelThisRound)]
     if (doSplit):
         for splitNum in range(splitNumLowBound, splitNumHighBound, splitStepSize):	
             if (algorithm == "splitThread"): 
@@ -361,7 +363,8 @@ def  testSweep(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes
             timeKernelList+= [timeKernelThisRound]
             totalTimeKernelList+= [(splitNum,totalTimeKernelThisRound)]
 	    totalTimeRandList+=[(splitNum,totalTimeRandThisRound)]
-    return (timeRandList, timeKernelList, totalTimeKernelList, totalTimeRandList)
+	    totalTimeAdded +=[(splitNum,totalTimeRandThisRound + totalTimeKernelThisRound)]
+    return (timeRandList, timeKernelList, totalTimeKernelList, totalTimeRandList, totalTimeAdded)
 	
 
 
