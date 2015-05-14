@@ -421,13 +421,13 @@ int main(int argc, char* argv[])
         status = clFlush(commandQueue);
         CHECK_OPENCL_ERROR(status, "clFlush failed.(commandQueue)");
 
-        sdk_timer->startTimer(rand_timer);
+        //sdk_timer->startTimer(rand_timer);
         for(int i = prime; i < numofnodes; i++){
             nodes_randvalues[i]= static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/20));
             std::atomic_store_explicit ((std::atomic<int>*)&nodes_ready[i], 1, std::memory_order_release);
             //cout << nodes_randvalues[i] << endl;
         }
-        sdk_timer->stopTimer(rand_timer);
+        //sdk_timer->stopTimer(rand_timer);
         //cout << "randomization time: " << (double)(sdk_timer->readTimer(rand_timer)) << "s"  << endl;
         rand_times.push_back((double)(sdk_timer->readTimer(rand_timer)));
 	    

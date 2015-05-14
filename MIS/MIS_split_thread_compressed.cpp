@@ -263,7 +263,7 @@ int main(int argc, char* argv[])
 	cl_kernel mis_parallel_kernel = clCreateKernel(program,"mis_parallel_async", &status);  //uses the opencl file. create couple if you have a copule of kernels
     CHECK_OPENCL_ERROR(status, "clCreateKernel mis_parallel_async failed");
 
-	//cl_kernel deactivate_neighbors_kernel = clCreateKernel(program,"deactivate_neighbors", &status);  //uses the opencl file. create couple if you have a copule of kernels
+	cl_kernel deactivate_neighbors_kernel = clCreateKernel(program,"deactivate_neighbors", &status);  //uses the opencl file. create couple if you have a copule of kernels
     //CHECK_OPENCL_ERROR(status, "clCreateKernel deactivate_neighbors failed");
     
    /*Step 9: Sets Kernel arguments.*/
@@ -316,59 +316,57 @@ int main(int argc, char* argv[])
                 splitSize); 
     	CHECK_OPENCL_ERROR(status, "setting kernel arguments failed"); 
 
-    status = clSetKernelArgSVMPointer(
-                mis_parallel_kernel,
-                9, 
-                gpu_remaining_nodes);
-    CHECK_OPENCL_ERROR(status, "setting kernel arguments failed"); 
-	
-	    // For deactivate_neighbors kernel
-	//status = clSetKernelArgSVMPointer(
-    //            deactivate_neighbors_kernel,
-    //            0,
-    //            nodes);
-    //CHECK_OPENCL_ERROR(status, "setting kernel arguments failed asdfas"); 
-
     //status = clSetKernelArgSVMPointer(
-    //            deactivate_neighbors_kernel,
-    //            1, 
-    //            nodes_randvalues); 
-    //CHECK_OPENCL_ERROR(status, "setting kernel arguments failed"); 
-
-    //status = clSetKernelArgSVMPointer(
-    //            deactivate_neighbors_kernel,
-    //            2, 
-    //            nodes_status); 
-    //CHECK_OPENCL_ERROR(status, "setting kernel arguments failed"); 
-
-    //status = clSetKernelArgSVMPointer(
-    //            deactivate_neighbors_kernel,
-    //            3, 
+    //            mis_parallel_kernel,
+    //            9, 
     //            gpu_remaining_nodes);
     //CHECK_OPENCL_ERROR(status, "setting kernel arguments failed"); 
+	
+	    // For deactivate_neighbors kernel
+	status = clSetKernelArgSVMPointer(
+                deactivate_neighbors_kernel,
+                0,
+                nodes);
+    CHECK_OPENCL_ERROR(status, "setting kernel arguments failed asdfas"); 
 
-    //status = clSetKernelArgSVMPointer(
-    //            deactivate_neighbors_kernel,
-    //            4, 
-    //            index_array); 
-    //CHECK_OPENCL_ERROR(status, "setting kernel arguments failed"); 
+    status = clSetKernelArgSVMPointer(
+                deactivate_neighbors_kernel,
+                1, 
+                nodes_randvalues); 
+    CHECK_OPENCL_ERROR(status, "setting kernel arguments failed"); 
 
-    //status = clSetKernelArgSVMPointer(
-    //            deactivate_neighbors_kernel,
-    //            5,
-    //            nodes_execute); 
-    //CHECK_OPENCL_ERROR(status, "setting kernel arguments failed"); 
+    status = clSetKernelArgSVMPointer(
+                deactivate_neighbors_kernel,
+                2, 
+                nodes_status); 
+    CHECK_OPENCL_ERROR(status, "setting kernel arguments failed"); 
 
-	////cagri : adding parameter to pass	
-	//status = clSetKernelArgSVMPointer(
-    //            deactivate_neighbors_kernel,
-    //            6,
-    //            splitSize); 
-    //	CHECK_OPENCL_ERROR(status, "setting kernel arguments failed"); 
+    status = clSetKernelArgSVMPointer(
+                deactivate_neighbors_kernel,
+                3, 
+                gpu_remaining_nodes);
+    CHECK_OPENCL_ERROR(status, "setting kernel arguments failed"); 
+
+    status = clSetKernelArgSVMPointer(
+                deactivate_neighbors_kernel,
+                4, 
+                index_array); 
+    CHECK_OPENCL_ERROR(status, "setting kernel arguments failed"); 
+
+    status = clSetKernelArgSVMPointer(
+                deactivate_neighbors_kernel,
+                5,
+                nodes_execute); 
+    CHECK_OPENCL_ERROR(status, "setting kernel arguments failed"); 
+
+	//cagri : adding parameter to pass	
+	status = clSetKernelArgSVMPointer(
+                deactivate_neighbors_kernel,
+                6,
+                splitSize); 
+    CHECK_OPENCL_ERROR(status, "setting kernel arguments failed"); 
 
 	
-
-    
 	*splitSize = (int)numofnodes / (int)totalNumOfSplit;
 	printf("split size is  %d", *splitSize);
     //setting the workgropu sizes	
@@ -385,12 +383,12 @@ int main(int argc, char* argv[])
 	cl_event *sync = new cl_event[totalNumOfSplit];
 
 
-  cl_int** splitNums = new cl_int*[totalNumOfSplit];
-  for (int i=0; i<totalNumOfSplit; i++){
-      splitNums[i] = (int*) clSVMAlloc(context, CL_MEM_SVM_FINE_GRAIN_BUFFER, sizeof(int), 0);
-      CHECK_ALLOCATION(splitNums[i], "Failed to allocate SVM memory. (step)");
-      *(splitNums[i]) = i;
-  }
+    cl_int** splitNums = new cl_int*[totalNumOfSplit];
+    for (int i=0; i<totalNumOfSplit; i++){
+        splitNums[i] = (int*) clSVMAlloc(context, CL_MEM_SVM_FINE_GRAIN_BUFFER, sizeof(int), 0);
+        CHECK_ALLOCATION(splitNums[i], "Failed to allocate SVM memory. (step)");
+        *(splitNums[i]) = i;
+    }
  
 
     //srand (static_cast<int>(time(0)));
@@ -430,8 +428,8 @@ int main(int argc, char* argv[])
 
             status = clSetKernelArgSVMPointer(mis_parallel_kernel,8,splitNums[splitNumber]); 
             CHECK_OPENCL_ERROR(status, "setting kernel arguments failed"); 
-            //status = clSetKernelArgSVMPointer(deactivate_neighbors_kernel,7,splitNums[splitNumber]); 
-            //CHECK_OPENCL_ERROR(status, "setting kernel arguments failed"); 
+            status = clSetKernelArgSVMPointer(deactivate_neighbors_kernel,7,splitNums[splitNumber]); 
+            CHECK_OPENCL_ERROR(status, "setting kernel arguments failed"); 
 
 
             status = clEnqueueNDRangeKernel(commandQueues[splitNumber],mis_parallel_kernel,1,NULL,&globalWorkItems[splitNumber],&localWorkItems,0,NULL, NULL);
@@ -439,8 +437,9 @@ int main(int argc, char* argv[])
             CHECK_OPENCL_ERROR(status, "clEnqueueNDRangeKernel(mis_parrallel_kernel) failed."); 
 
             // launch kernels (special case for the last one)
+            status = clEnqueueNDRangeKernel(commandQueues[splitNumber],deactivate_neighbors_kernel,1,NULL,&globalWorkItems[splitNumber],&localWorkItems,0,NULL,NULL);
             //status = clEnqueueNDRangeKernel(commandQueues[splitNumber],deactivate_neighbors_kernel,1,NULL,&globalWorkItems[splitNumber],&localWorkItems,0,NULL,&sync[splitNumber]);
-            //CHECK_OPENCL_ERROR(status, "clEnqueueNDRangeKernel(deactivate_neighbors_kernel) failed."); 
+            CHECK_OPENCL_ERROR(status, "clEnqueueNDRangeKernel(deactivate_neighbors_kernel) failed."); 
             status = clFlush(commandQueues[splitNumber]);
             CHECK_OPENCL_ERROR(status, "clFlush failed.(commandQueues[0])");
         }
@@ -479,7 +478,7 @@ int main(int argc, char* argv[])
 
 	/*Step 12: Clean the resources.*/
 	status = clReleaseKernel(mis_parallel_kernel);				//Release kernel.
-	//status = clReleaseKernel(deactivate_neighbors_kernel);				//Release kernel.
+	status = clReleaseKernel(deactivate_neighbors_kernel);				//Release kernel.
 	status = clReleaseProgram(program);				//Release the program object.
 	//status = clReleaseCommandQueue(commandQueues[0]);	//Release  Command queue.
 	status = clReleaseContext(context);				//Release context.
