@@ -32,7 +32,7 @@ __kernel void simple_program(__global int* buffer, __global atomic_int* atomicBu
 
 }
 
-__kernel void mis_parallel_async(__global int *nodes, __global float *nodes_randvalues, __global int *nodes_status, __global int* indexarray, __global int* execute, volatile __global atomic_int *ready, __global int* node_counters, __global int* offset, __global int* stepcount) { //, __global int* node_neighbor_counters) {
+__kernel void mis_parallel_async(__global int *nodes, __global float *nodes_randvalues, __global atomic_int *nodes_status, __global int* indexarray, __global int* execute, volatile __global atomic_int *ready, __global int* node_counters, __global int* offset, __global int* stepcount, volatile __global int *remaining_nodes) { //, __global int* node_neighbor_counters) {
     int i = get_global_id(0);
     
 	i = i + (*stepcount * *offset);
@@ -44,7 +44,7 @@ __kernel void mis_parallel_async(__global int *nodes, __global float *nodes_rand
 
     int numofneighbour = indexarray[i+1] - indexarray[i];
 
-    if(nodes_status[i] == ACTIVE )
+    if( atomic_load_explicit(&nodes_status[i], memory_order_acquire, memory_scope_all_svm_devices) == ACTIVE )
     {   
         //int counter = 0;
         while (/*counter < 100000000 &&*/ atomic_load_explicit (&ready[i], memory_order_acquire, memory_scope_all_svm_devices) != 1){
@@ -60,16 +60,31 @@ __kernel void mis_parallel_async(__global int *nodes, __global float *nodes_rand
             }
             //node_counters[i] = counter;
 
-            if(nodes_status[nodes[indexarray[i] + k]] == ACTIVE && nodes_randvalues[i] > nodes_randvalues[nodes[indexarray[i] + k]]) 
+            if((atomic_load_explicit(&nodes_status[nodes[indexarray[i] + k]], memory_order_acquire, memory_scope_all_svm_devices) == ACTIVE && nodes_randvalues[i] > nodes_randvalues[nodes[indexarray[i] + k]]) || atomic_load_explicit(&nodes_status[nodes[indexarray[i] + k]], memory_order_acquire, memory_scope_all_svm_devices) == SELECTED)
             {
                 execute[i] = 0;
                 break;
             }
         }   
+
+        if (execute[i] == 1)
+        {
+            nodes_status[i] = SELECTED;  // select myself
+            atomic_dec(remaining_nodes);  // remove myself from active node count
+            for(int k = 0 ; k < numofneighbour; k++)
+            {
+                if( atomic_exchange(&nodes_status[nodes[indexarray[i] + k]], INACTIVE) )
+                {
+                    //nodes_status[nodes[indexarray[i] + k ]] = 0;
+                    atomic_dec(remaining_nodes);
+                }
+            }
+        }
     }
-    else
-        execute[i] = 0;
+    //else
+    //    execute[i] = 0;
 }
+/*
 
 __kernel void deactivate_neighbors(__global int *nodes, __global float *nodes_randvalues, volatile __global atomic_int *nodes_status, volatile __global int *remaining_nodes, __global int* indexarray, __global int* execute, __global int* offset, __global int* stepcount) {
     int i = get_global_id(0);
@@ -95,6 +110,7 @@ __kernel void deactivate_neighbors(__global int *nodes, __global float *nodes_ra
         }
     }
 }
+*/
 
 
 
