@@ -11,8 +11,9 @@ testName = "runSomeSampleTests"
 
 #---------guide::: algorithm type
 #algorithm = "serial"
-algorithm = "asyncParallel"
+#algorithm = "asyncParallel"
 #algorithm = "syncParallel"
+algorithm = "splitThread"
 #algorithm = "all" #includes serial, synchronous parallel, and asynchrnous parallel, more might be added later
 
 #---------guide::: generated graph parameters 
@@ -29,20 +30,28 @@ degree = 20
 
 
 #---------guide::: priming info
-doPrime = True
+#doPrime = True
+doPrime = False
 primeNumber = 3
 primeFull = False
 
 
-#---------guide::: sweep or only test once
-sweep = True #if this is set to true, then we sweep the space with different prime numbers between primeNumLowBound and HighBound given bellow
-#sweep = False #if false, runs the test only once
-#set the following variables if sweep is through
+#---------guide::: sweepPrime or only test once
+#sweepPrime = True #if this is set to true, then we sweepPrime the space with different prime numbers between primeNumLowBound and HighBound given bellow
+sweepPrime = False #if false, runs the test only once
+#set the following variables if sweepPrime is through
 primeNumLowBound = 20
 primeNumHighBound = numOfNodes
 primeStepSize =   20 
 
-
+doSplit = True
+#doSplit = False
+splitNumber = 10
+#sweepSplit = True
+sweepSplit = False
+splitNumLowBound = 10
+splitNumHighBound = 65
+splitStepSize = 20 
 
 
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -58,6 +67,32 @@ if (doPrime):
         primeNum = primeNumber
 else:
     primeNum = 0
+
+
+splitNum = 0
+if (doSplit):
+    splitNum = splitNumber;
+else:
+    splitNum = 0
+
+
+
+if (doPrime and doSplit):
+    print "****ERROR: you can only either pick sweepPrim or sweepSplit"
+    exit()
+
+if not(doPrime):
+    if(sweepPrime):
+        print "****ERROR: you can not prime but sweep prime. double check your parameters and set doPrime to True if you want to sweep prime, otherwise set sweepPrim to False"
+        exit()
+if not(doSplit):
+    if(sweepSplit):
+        print "***ERROR: you can not split but sweep split. double check your parameters and set doSplit to True if you want to sweep split, otherwise set sweepSplit to False"
+        exit()
+
+
+
+
 
 #degree = 0
 #if (graphType == "degreeBased"):
@@ -76,14 +111,16 @@ if (generateGraph):
 
 
 #---------guide::: testing everything
-if (sweep):
-    timeRand, timeKernel, totalTimeKernel, totalTimeRand = testSweep(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes, numOfTests, graphType, degree, doPrime, primeNumLowBound,primeNumHighBound, primeStepSize, primeFull)
+
+if (sweepPrime or sweepSplit):
+    timeRand, timeKernel, totalTimeKernel, totalTimeRand = testSweep(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes, numOfTests, graphType, degree, doPrime, primeNumLowBound,primeNumHighBound, primeStepSize, primeFull, splitNumLowBound, splitNumHighBound, doSplit, splitStepSize)
     print "timeRand is" + str(timeRand)
     print "timeKernel is" + str(timeKernel)
     print "totalTimeKernel is " + str(totalTimeKernel)
     print "totalTimeRand is " + str(totalTimeRand)
 else:
-    timeRand, timeKernel, totalTimeKernel, totalTimeRand =  testOnce(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes, numOfTests, graphType, degree, doPrime, primeNum, primeFull)
+    timeRand, timeKernel, totalTimeKernel, totalTimeRand =  testOnce(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes, numOfTests, graphType, degree, doPrime, primeNum, primeFull, doSplit, splitNum)
+
     print "timeRand is" + str(timeRand)
     print "timeKernel is" + str(timeKernel)
     print "totalTimeKernel is " + str(totalTimeKernel)

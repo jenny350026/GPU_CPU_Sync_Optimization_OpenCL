@@ -104,7 +104,38 @@ def runAsyncParallel(sparseRepFileName, MISResultToVerifyFileNameSerial, logFile
     
     return verifyMaximalSetCVersion(sparseRepFileName,  MISResultToVerifyFileNameParallel, logFileName)
     #return verifyMaximalSet(sparseRepFileName,  MISResultToVerifyFileNameParallel, logFileName)
-       
+
+
+
+
+#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#---------guide::: test the synchrnous parallel code
+#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+def runSplitThread(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCasek, splitNum):
+    os.system("./buildsplit.sh")
+    #os.system("./MIS_parallel_async" + " " + sparseRepFileName + " " + MISResultToVerifyFileNameParallel + " " + logFileName + " " + str(primeNum) + " " + logFileName+"_counter"); 
+    os.system("./MIS_split_thread" + " " + sparseRepFileName + " " + MISResultToVerifyFileNameParallel + " " + logFileName + " "  + " " + logFileName+"_counter" + " " + str(splitNum)); 
+    logFilePtr = open(logFileName, "a");
+    logFilePtr.write("\n");
+    logFilePtr.write("\n");
+    logFilePtr.write("*************************Result of the splitThread implemetations*********************************\n")
+    MISResultToVerifyFileParallelPtr = open(MISResultToVerifyFileNameParallel, "r");
+    logFilePtr.write(MISResultToVerifyFileParallelPtr.read());
+    #   ##---------guide::: verify
+    print "verifying the splitThread exection...."
+    logFilePtr.write("***********************************************************************************************\n")
+    logFilePtr.write("*************************splitThread Test Results: ***********************************************\n")
+    
+    #logFilePtr.write("*******************************************************************************************************************\n")
+    logFilePtr.close() 
+    
+    return verifyMaximalSetCVersion(sparseRepFileName,  MISResultToVerifyFileNameParallel, logFileName)
+    #return verifyMaximalSet(sparseRepFileName,  MISResultToVerifyFileNameParallel, logFileName)
+ 
+
+
 ##------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ##---------guide::: test the serial code 
 #def runSerial(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase):
@@ -158,6 +189,7 @@ def generateLogFileName():
     #---------guide:::  generate a log file and append the spares rep nad resultto it
     if not(os.path.isdir("./log")):
         os.system("mkdir log");
+    print "write here" 
     timeSuffix = strftime("%M", gmtime()) + strftime("%S", gmtime()) +".txt"
     logFileName = "./log/log_" + timeSuffix
     if not(os.path.isdir("./log/failed")):
@@ -210,7 +242,7 @@ def runAll(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logF
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 #---------guide::: testing everything
-def testOnce(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes, numOfTests, graphType, degree, doPrime, primeNum, primeFull):
+def testOnce(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes, numOfTests, graphType, degree, doPrime, primeNum, primeFull, doSplit, splitNum):
 	if (testName == "runSomeSampleTests"):
 	    counter  = 0
 	    for i in range (0, numOfTests):
@@ -229,7 +261,9 @@ def testOnce(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes, 
 	            runSyncParallel(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase) 
 	        elif (algorithm == "asyncParallel"): 
 	            runAsyncParallel(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase, primeNum)
-	        elif(algorithm == "all"):
+                elif (algorithm == "splitThread"): 
+	            runSplitThread(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase, splitNum)
+                elif(algorithm == "all"):
 	            runAll(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase) 
 	        else:
 	            print "this algorithm is not acceptable" 
@@ -283,7 +317,7 @@ def testOnce(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes, 
 
 
 
-def testSweep(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes, numOfTests, graphType, degree, doPrime, primeNumLowBound,primeNumHighBound, primeStepSize, primeFull):
+def  testSweep(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes, numOfTests, graphType, degree, doPrime, primeNumLowBound,primeNumHighBound, primeStepSize, primeFull, splitNumLowBound, splitNumHighBound, doSplit,splitStepSize):
     #generate a graph       
     timeRandList = []
     timeKernelList =[]
@@ -295,27 +329,34 @@ def testSweep(testName, algorithm, generateGraph, sparseRepFileName, numOfNodes,
             counter+=1
     logFileName, logFileNameFailedCase = generateLogFileName()    
     writeSparse(logFileName, sparseRepFileName) 
+    if (doPrime):
+        for primeNum in range(primeNumLowBound, primeNumHighBound, primeStepSize):	
+            if (algorithm == "serial"): 
+                #---------guide:::  run serial test
+                    runSerial(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase) 
+            elif (algorithm == "syncParallel"): 
+                #---------guide:::  run parallel
+                runSyncParallel(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase) 
+            elif (algorithm == "asyncParallel"): 
+                runAsyncParallel(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase, primeNum)
+            elif(algorithm == "all"):
+                runAll(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase) 
+            else:
+                print "this algorithm is not acceptable" 
+                exit()
+    if (doSplit):
+        for splitNum in range(splitNumLowBound, splitNumHighBound, splitStepSize):	
+            if (algorithm == "splitThrad"): 
+                runsplitThread(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase, splitNum)
+            else:
+                print "this algorithm is not acceptable" 
+                exit()
 
-    for primeNum in range(primeNumLowBound, primeNumHighBound, primeStepSize):	
-        if (algorithm == "serial"): 
-            #---------guide:::  run serial test
-            runSerial(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase) 
-        elif (algorithm == "syncParallel"): 
-            #---------guide:::  run parallel
-            runSyncParallel(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase) 
-        elif (algorithm == "asyncParallel"): 
-            runAsyncParallel(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase, primeNum)
-        elif(algorithm == "all"):
-            runAll(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileName, logFileNameFailedCase) 
-        else:
-            print "this algorithm is not acceptable" 
-            exit()
-
-        timeRandThisRound, timeKernelThisRound, totalTimeKernelThisRound, totalTimeRandThisRound = getTimeInfo(logFileName) 
-        timeRandList+= [timeRandThisRound]
-        timeKernelList+= [timeKernelThisRound]
-        totalTimeKernelList+= [totalTimeKernelThisRound]
-        totalTimeRandList+=[totalTimeRandThisRound]
+    timeRandThisRound, timeKernelThisRound, totalTimeKernelThisRound, totalTimeRandThisRound = getTimeInfo(logFileName) 
+    timeRandList+= [timeRandThisRound]
+    timeKernelList+= [timeKernelThisRound]
+    totalTimeKernelList+= [totalTimeKernelThisRound]
+    totalTimeRandList+=[totalTimeRandThisRound]
     return (timeRandList, timeKernelList, totalTimeKernelList, totalTimeRandList)
 	
 
