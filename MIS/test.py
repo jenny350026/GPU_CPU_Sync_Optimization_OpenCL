@@ -17,8 +17,9 @@ algorithm = "splitThread"
 #algorithm = "all" #includes serial, synchronous parallel, and asynchrnous parallel, more might be added later
 
 #---------guide::: generated graph parameters 
-generateGraph = True 
-sparseRepFileName = "../../exotic_graphs/nlpkkt120.graph" #sparse representation of the graph
+generateGraph = False
+#sparseRepFileName = "../../exotic_graphs/nlpkkt120.graph" #sparse representation of the graph
+sparseRepFileName = "../../exotic_graphs/af_shell9.graph" #sparse representation of the graph
 
 numOfNodes = 80
 numOfTests = 1 
