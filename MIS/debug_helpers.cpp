@@ -229,15 +229,15 @@ void writeToFileTiming(vector<double> step_times, vector<double> rand_times, int
     double total_rand_time = 0;
     for(int i = 0; i < step_times.size(); ++i){
         //myfile << "Step [" << i << "] time " << step_times[i] << endl;
-        myfile << "timeKernel: " << step_times[i] << endl;
         myfile << "timeRand: " << rand_times[i] << endl;
+        myfile << "timeKernel: " << step_times[i] << endl;
         total_kernel_time += step_times[i];
         total_rand_time += rand_times[i];
     }
 
     myfile << "Total steps: " << step_times.size() << endl;
-    myfile << "Total time kernel: " << total_kernel_time << endl;
     myfile << "Total rand kernel: " << total_rand_time << endl;
+    myfile << "Total time kernel: " << total_kernel_time << endl;
 
     myfile.close();
 }
