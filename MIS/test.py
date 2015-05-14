@@ -17,10 +17,10 @@ algorithm = "splitThread"
 #algorithm = "all" #includes serial, synchronous parallel, and asynchrnous parallel, more might be added later
 
 #---------guide::: generated graph parameters 
-generateGraph = True 
-sparseRepFileName = "../../exotic_graphs/nlpkkt120.graph" #sparse representation of the graph
+generateGraph = False
+sparseRepFileName = "../../original_inputfiles/af_shell9.graph" #sparse representation of the graph
 
-numOfNodes = 80
+numOfNodes = 504855
 numOfTests = 1 
 
 #graphType = "completeChaos" #the graph is completely random, meaning the degree is not set
@@ -33,16 +33,24 @@ degree = 20
 #doPrime = True
 doPrime = False
 primeNumber = 3
-primeFull = False
+primeFull = True
 
 
+<<<<<<< Updated upstream
 #---------guide::: sweepPrime or only test once
 #sweepPrime = True #if this is set to true, then we sweepPrime the space with different prime numbers between primeNumLowBound and HighBound given bellow
 sweepPrime = False #if false, runs the test only once
 #set the following variables if sweepPrime is through
 primeNumLowBound = 20
+=======
+#---------guide::: sweep or only test once
+sweep = False #if this is set to true, then we sweep the space with different prime numbers between primeNumLowBound and HighBound given bellow
+#sweep = False #if false, runs the test only once
+#set the following variables if sweep is through
+primeNumLowBound = 400000
+>>>>>>> Stashed changes
 primeNumHighBound = numOfNodes
-primeStepSize =   20 
+primeStepSize =   25000
 
 doSplit = True
 #doSplit = False

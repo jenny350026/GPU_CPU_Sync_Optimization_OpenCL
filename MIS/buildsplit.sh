@@ -7,8 +7,8 @@ echo "Removing previous MIS_split_thread.o"
 if [ -f MIS_split_thread.o ] ; then rm MIS_split_thread.o ; fi
 echo "Removing previous debug_helpers.o"
 if [ -f debug_helpers.o ] ; then rm debug_helpers.o ; fi
-echo "g++ -o MIS_split_thread.o -c MIS_split_thread.cpp  debug_helpers.cpp -I$AMDAPPSDKROOT/include"
-g++ -std=c++11 -o MIS_split_thread.o -c MIS_split_thread.cpp   -I ./ -I$AMDAPPSDKROOT/include 
+echo "g++ -std=c++11 -o MIS_split_thread.o -c MIS_split_thread_compressed.cpp   -I ./ -I$AMDAPPSDKROOT/include"
+g++ -std=c++11 -o MIS_split_thread.o -c MIS_split_thread_compressed.cpp   -I ./ -I$AMDAPPSDKROOT/include 
 g++ -std=c++11 -c debug_helpers.cpp  -o debug_helpers.o -I ./ -I$AMDAPPSDKROOT/include 
 
 echo "Removing previous executable MIS_split_thread" 
