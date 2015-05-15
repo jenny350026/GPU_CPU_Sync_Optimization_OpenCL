@@ -117,6 +117,8 @@ def runSplitThread(sparseRepFileName, MISResultToVerifyFileNameSerial, logFileNa
     os.system("./buildsplit.sh")
     #os.system("./MIS_parallel_async" + " " + sparseRepFileName + " " + MISResultToVerifyFileNameParallel + " " + logFileName + " " + str(primeNum) + " " + logFileName+"_counter"); 
     os.system("./MIS_split_thread" + " " + sparseRepFileName + " " + MISResultToVerifyFileNameParallel + " " + logFileName + " "  + " " + logFileName+"_counter" + " " + str(splitNum)); 
+    
+    print "./MIS_split_thread" + " " + sparseRepFileName + " " + MISResultToVerifyFileNameParallel + " " + logFileName + " "  + " " + logFileName+"_counter" + " " + str(splitNum); 
     logFilePtr = open(logFileName, "a");
     logFilePtr.write("\n");
     logFilePtr.write("\n");
